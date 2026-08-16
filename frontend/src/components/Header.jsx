@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bell, Wifi, Video, Search, LogOut } from 'lucide-react';
+import { Bell, Wifi, Video, Search, LogOut, Bot, Sparkles } from 'lucide-react';
 
 export default function Header({
   activeHeaderTab,
@@ -9,6 +9,7 @@ export default function Header({
   onToggleNotifications,
   onOpenNetwork,
   onOpenVideo,
+  onOpenReceptionist,
   onOpenProfile,
   currentUser,
   onLogout
@@ -42,6 +43,7 @@ export default function Header({
       </div>
 
       <div className="header-right">
+
         <div style={{ position: 'relative' }}>
           <Search size={14} style={{ position: 'absolute', left: 12, top: 10, color: '#64748b' }} />
           <input
@@ -55,38 +57,57 @@ export default function Header({
         </div>
 
         <div style={{ position: 'relative', cursor: 'pointer' }} onClick={onToggleNotifications} title="Notifications">
-          <Bell size={18} color="#93c5fd" />
+          <Bell size={18} color="#ffffff" />
           <span style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, background: '#ef4444', borderRadius: '50%' }}></span>
         </div>
 
-        <Wifi size={18} color="#93c5fd" style={{ cursor: 'pointer' }} onClick={onOpenNetwork} title="Gateway Status" />
-        
-        {canUseVideo && (
-          <Video size={18} color="#93c5fd" style={{ cursor: 'pointer' }} onClick={onOpenVideo} title="Telehealth Video Call" />
-        )}
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', borderLeft: '1px solid rgba(255,255,255,0.25)', paddingLeft: '0.75rem' }} onClick={onOpenProfile}>
-          <img
-            src={currentUser?.avatar}
-            alt={currentUser?.name}
-            className="avatar"
-            title={`${currentUser?.name} (${currentUser?.role})`}
-            style={{ border: '1px solid rgba(255,255,255,0.5)' }}
-          />
-          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.1' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#ffffff' }}>{currentUser?.name}</span>
-            <span style={{ fontSize: '0.68rem', color: '#93c5fd', fontWeight: 600 }}>{currentUser?.role?.split(' ')[0]}</span>
-          </div>
+        <div style={{ cursor: 'pointer' }} onClick={onOpenNetwork} title="BLE IoT Network Telemetry">
+          <Wifi size={18} color="#ffffff" />
         </div>
 
-        <button
-          className="btn-ctrl"
-          style={{ padding: '0.35rem 0.6rem', color: '#dc2626', borderColor: '#fca5a5', background: '#ffffff', borderRadius: '6px' }}
-          onClick={onLogout}
-          title="Sign Out & Return to Login"
-        >
-          <LogOut size={15} />
-        </button>
+        {canUseVideo && (
+          <div style={{ cursor: 'pointer' }} onClick={onOpenVideo} title="Telehealth Video Intake">
+            <Video size={18} color="#ffffff" />
+          </div>
+        )}
+
+        {/* Clinical Role Profile Badge & Sign Out Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', paddingLeft: '0.5rem', borderLeft: '1px solid rgba(255,255,255,0.2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer' }} onClick={onOpenProfile}>
+            <img
+              src={currentUser?.avatar || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=100&auto=format&fit=crop&q=80'}
+              alt="Avatar"
+              style={{ width: 34, height: 34, borderRadius: '50%', border: '2px solid #ffffff', objectFit: 'cover' }}
+            />
+            <div style={{ lineHeight: '1.2' }}>
+              <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#ffffff' }}>
+                {currentUser?.name || 'Dr. Alex Rivera'}
+              </div>
+              <div style={{ fontSize: '0.7rem', color: '#e0f2fe' }}>
+                {currentUser?.role || 'ED Physician'}
+              </div>
+            </div>
+          </div>
+
+          <button
+            onClick={onLogout}
+            style={{
+              background: '#ffffff',
+              color: '#dc2626',
+              border: 'none',
+              borderRadius: '6px',
+              padding: '0.4rem 0.6rem',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 700
+            }}
+            title="Sign Out Portal"
+          >
+            <LogOut size={16} />
+          </button>
+        </div>
       </div>
     </header>
   );

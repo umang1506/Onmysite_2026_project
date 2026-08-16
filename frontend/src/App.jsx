@@ -18,6 +18,7 @@ import NotificationDrawer from './components/NotificationDrawer';
 import NetworkStatusModal from './components/NetworkStatusModal';
 import TelehealthVideoModal from './components/TelehealthVideoModal';
 import UserProfileModal from './components/UserProfileModal';
+import AiReceptionistModal from './components/AiReceptionistModal';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -36,6 +37,7 @@ export default function App() {
   const [isNetworkOpen, setIsNetworkOpen] = useState(false);
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isReceptionistOpen, setIsReceptionistOpen] = useState(false);
 
   // Initial Sessions State
   const [sessions, setSessions] = useState([
@@ -233,7 +235,7 @@ export default function App() {
             actionType: a.action === 'ignored' ? 'ignored' : a.action === 'ingested' ? 'ingested' : 'override'
           }))
         : [
-            { id: 'EV-NEW', source: 'Video Intake', time: new Date().toLocaleTimeString(), action: 'Ingested', actionType: 'ingested' },
+            { id: 'EV-NEW', source: 'AI Receptionist', time: new Date().toLocaleTimeString(), action: 'Ingested', actionType: 'ingested' },
             { id: 'SYS-EV', source: 'Rules Engine', time: new Date().toLocaleTimeString(), action: 'Evaluated', actionType: 'reconciled' }
           ]
     };
@@ -277,6 +279,7 @@ export default function App() {
         onNewSession={() => setIsNewSessionOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenSupport={() => setIsSupportOpen(true)}
+        onOpenReceptionist={() => setIsReceptionistOpen(true)}
         currentUser={currentUser}
       />
 
@@ -295,6 +298,7 @@ export default function App() {
           onToggleNotifications={() => setIsNotificationsOpen(!isNotificationsOpen)}
           onOpenNetwork={() => setIsNetworkOpen(true)}
           onOpenVideo={() => setIsVideoOpen(true)}
+          onOpenReceptionist={() => setIsReceptionistOpen(true)}
           onOpenProfile={() => setIsProfileOpen(true)}
           currentUser={currentUser}
           onLogout={handleLogout}
@@ -385,6 +389,12 @@ export default function App() {
         onClose={() => setIsProfileOpen(false)}
         currentUser={currentUser}
         onLogout={handleLogout}
+      />
+
+      <AiReceptionistModal
+        isOpen={isReceptionistOpen}
+        onClose={() => setIsReceptionistOpen(false)}
+        onSessionCreated={handleNewSessionCreated}
       />
     </div>
   );
