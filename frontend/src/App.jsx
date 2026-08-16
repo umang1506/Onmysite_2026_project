@@ -19,6 +19,7 @@ import NetworkStatusModal from './components/NetworkStatusModal';
 import TelehealthVideoModal from './components/TelehealthVideoModal';
 import UserProfileModal from './components/UserProfileModal';
 import AiReceptionistModal from './components/AiReceptionistModal';
+import BedCapacityModal from './components/BedCapacityModal';
 
 export default function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -38,6 +39,7 @@ export default function App() {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isReceptionistOpen, setIsReceptionistOpen] = useState(false);
+  const [isBedsOpen, setIsBedsOpen] = useState(false);
 
   // Initial Sessions State
   const [sessions, setSessions] = useState([
@@ -280,6 +282,7 @@ export default function App() {
         onOpenSettings={() => setIsSettingsOpen(true)}
         onOpenSupport={() => setIsSupportOpen(true)}
         onOpenReceptionist={() => setIsReceptionistOpen(true)}
+        onOpenBeds={() => setIsBedsOpen(true)}
         currentUser={currentUser}
       />
 
@@ -395,6 +398,12 @@ export default function App() {
         isOpen={isReceptionistOpen}
         onClose={() => setIsReceptionistOpen(false)}
         onSessionCreated={handleNewSessionCreated}
+      />
+
+      <BedCapacityModal
+        isOpen={isBedsOpen}
+        onClose={() => setIsBedsOpen(false)}
+        activeSession={sessions.find((s) => s.sessionId === selectedSessionId)}
       />
     </div>
   );

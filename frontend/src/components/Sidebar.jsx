@@ -1,7 +1,7 @@
 import React from 'react';
-import { LayoutDashboard, Radio, FolderHeart, Activity, Layers, Settings, HelpCircle, Plus, Bot, Activity as MedicalCross } from 'lucide-react';
+import { LayoutDashboard, Radio, FolderHeart, Activity, Layers, Settings, HelpCircle, Plus, Bot, Bed, Activity as MedicalCross } from 'lucide-react';
 
-export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenSettings, onOpenSupport, onOpenReceptionist, currentUser }) {
+export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenSettings, onOpenSupport, onOpenReceptionist, onOpenBeds, currentUser }) {
   const allNavItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['physician', 'admin'] },
     { id: 'triage-feed', label: 'Triage Feed', icon: Radio, roles: ['physician', 'nurse', 'psychiatrist'] },
@@ -57,7 +57,7 @@ export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenS
         </nav>
       </div>
 
-      {/* Bottom Sidebar Section: Settings, Support & AI Receptionist */}
+      {/* Bottom Sidebar Section: Settings, Support, AI Receptionist & Hospital Beds */}
       <div className="nav-section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
         {canAccessSettings && (
           <div className="nav-item" onClick={onOpenSettings}>
@@ -76,6 +76,14 @@ export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenS
         >
           <Bot size={18} color="#0284c7" />
           <span>AI Receptionist</span>
+        </div>
+        <div
+          className="nav-item"
+          onClick={onOpenBeds}
+          style={{ background: '#f0fdf4', color: '#16a34a', fontWeight: 700, borderRadius: '8px' }}
+        >
+          <Bed size={18} color="#16a34a" />
+          <span>Hospital Beds</span>
         </div>
       </div>
     </aside>
