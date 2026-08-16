@@ -20,7 +20,7 @@ export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenS
     <aside className="sidebar">
       <div>
         <div className="app-brand">
-          <div className="brand-icon" style={{ background: '#e0f2fe', color: '#0284c7', width: 38, height: 38, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="brand-icon" style={{ background: '#e0f2fe', color: '#1d4ed8', width: 38, height: 38, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             <MedicalCross size={20} />
           </div>
           <div>
@@ -30,7 +30,7 @@ export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenS
         </div>
 
         {canCreateSession ? (
-          <button className="btn-new-session" onClick={onNewSession} style={{ background: '#0284c7', color: '#ffffff', fontWeight: 700, borderRadius: '8px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', border: 'none', width: '100%', marginBottom: '1.25rem', boxShadow: '0 4px 10px rgba(2, 132, 199, 0.25)' }}>
+          <button className="btn-new-session" onClick={onNewSession} style={{ background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%)', color: '#ffffff', fontWeight: 700, borderRadius: '8px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', border: 'none', width: '100%', marginBottom: '1.25rem', boxShadow: '0 4px 12px rgba(29, 78, 216, 0.3)' }}>
             <Plus size={18} /> New Triage Session
           </button>
         ) : (

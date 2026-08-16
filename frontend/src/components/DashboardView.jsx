@@ -15,7 +15,7 @@ export default function DashboardView({ currentUser, onNavigate }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Top Welcome Hero Banner */}
       <div style={{
-        background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #0284c7 100%)',
+        background: 'linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%)',
         borderRadius: '16px',
         padding: '1.75rem 2rem',
         color: '#ffffff',

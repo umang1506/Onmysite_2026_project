@@ -172,7 +172,7 @@ export default function App() {
     setActiveNav('triage-feed');
   };
 
-  const handleNewSessionCreated = ({ sessionId, patientId, formData, triageResult }) => {
+  const handleNewSessionCreated = ({ sessionId, patientId, formData, triageResult, videoUrl }) => {
     const rawDecision = triageResult.decision || 'General';
     let dType = 'General';
     let dCode = 'LEVEL 4';
@@ -203,11 +203,12 @@ export default function App() {
       badgeClass: bClass,
       decisionType: dType,
       decisionReason: triageResult.explanation || 'Evaluated by Onmysite Triage Engine.',
-      modalities: [formData.source || 'audio', 'sensor'],
+      videoUrl: videoUrl,
+      modalities: ['audio', 'sensor'],
       events: [
         {
           id: `EV-${Date.now()}-1`,
-          type: formData.source === 'audio' ? 'Audio' : 'Text Input',
+          type: formData.source === 'audio' ? 'Audio/Video' : 'Text Input',
           time: new Date().toLocaleTimeString(),
           source: formData.source || 'audio',
           text: `"${formData.symptoms}"`
@@ -230,7 +231,7 @@ export default function App() {
             actionType: a.action === 'ignored' ? 'ignored' : a.action === 'ingested' ? 'ingested' : 'override'
           }))
         : [
-            { id: 'EV-NEW', source: 'Intake', time: new Date().toLocaleTimeString(), action: 'Ingested', actionType: 'ingested' },
+            { id: 'EV-NEW', source: 'Video Intake', time: new Date().toLocaleTimeString(), action: 'Ingested', actionType: 'ingested' },
             { id: 'SYS-EV', source: 'Rules Engine', time: new Date().toLocaleTimeString(), action: 'Evaluated', actionType: 'reconciled' }
           ]
     };
@@ -314,6 +315,7 @@ export default function App() {
                   sessions={sessions}
                   activeSessionId={selectedSessionId}
                   onSelectSession={handleSelectSession}
+                  currentUser={currentUser}
                 />
               )}
 
@@ -373,6 +375,7 @@ export default function App() {
       <TelehealthVideoModal
         isOpen={isVideoOpen}
         onClose={() => setIsVideoOpen(false)}
+        onSessionCreated={handleNewSessionCreated}
       />
 
       <UserProfileModal

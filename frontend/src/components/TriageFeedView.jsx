@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { AlertTriangle, Fingerprint, Activity, Mic, MessageSquare, Play, Pause, SkipBack, SkipForward, Download, Sliders } from 'lucide-react';
-import { sendEvent, fetchTriage } from '../api/client';
+import React, { useState } from 'react';
+import { AlertTriangle, Fingerprint, Activity, Mic, MessageSquare, Play, Pause, SkipBack, SkipForward, Download, Sliders, Video } from 'lucide-react';
+import VideoPlaybackModal from './VideoPlaybackModal';
 
-export default function TriageFeedView({ sessions = [], activeSessionId = '#8842' }) {
+export default function TriageFeedView({ sessions = [], activeSessionId = '#8842', currentUser }) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [streamTime, setStreamTime] = useState('T-00:00:00 Live');
   const [liveSpo2, setLiveSpo2] = useState(null);
   const [liveHr, setLiveHr] = useState(null);
-  const [simulatedDecision, setSimulatedDecision] = useState(null);
+  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
 
   const currentSession = sessions.find((s) => s.sessionId === activeSessionId || s.id === activeSessionId) || sessions[0] || {
     sessionId: '#8842',
@@ -25,34 +25,28 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
 
   const activeSpo2 = liveSpo2 !== null ? liveSpo2 : currentSession.spo2;
   const activeHr = liveHr !== null ? liveHr : currentSession.hr;
-  const activeDecision = activeSpo2 < 90 || activeHr > 150 ? 'EMERGENCY' : (simulatedDecision || currentSession.decision);
+  const activeDecision = activeSpo2 < 90 || activeHr > 150 ? 'EMERGENCY' : currentSession.decision;
 
-  // Play synthetic Web Audio alert beep when emergency is triggered
   const playEmergencyTone = () => {
     try {
       const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sawtooth';
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
       gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
       osc.connect(gain);
       gain.connect(audioCtx.destination);
       osc.start();
       osc.stop(audioCtx.currentTime + 0.3);
-    } catch (e) {
-      // Audio context fallback
-    }
+    } catch (e) {}
   };
 
   const handleSpo2Change = (val) => {
     setLiveSpo2(val);
-    if (val < 90) {
-      playEmergencyTone();
-    }
+    if (val < 90) playEmergencyTone();
   };
 
-  // Export Clinical Audit Report JSON
   const handleExportAuditReport = () => {
     const reportData = {
       hospital: 'Onmysite Clinical Intelligence Gateway (Unit 7-B Center)',
@@ -63,10 +57,7 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
         dob: currentSession.dob,
         matchScore: `${currentSession.matchScore}%`
       },
-      currentVitals: {
-        spo2: `${activeSpo2}%`,
-        heartRate: `${activeHr} bpm`
-      },
+      currentVitals: { spo2: `${activeSpo2}%`, heartRate: `${activeHr} bpm` },
       triageDecision: activeDecision,
       decisionReason: currentSession.decisionReason,
       eventsStream: currentSession.events,
@@ -89,13 +80,20 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
         <div className="session-title">
           Active Triage Session: <span className="session-tag">{currentSession.sessionId}</span>
         </div>
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <button
+            className="btn-ctrl"
+            onClick={() => setIsVideoModalOpen(true)}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#1e40af', color: '#ffffff', borderColor: '#1e40af', fontWeight: 600 }}
+          >
+            <Video size={14} /> 🎥 Watch Recorded Video
+          </button>
           <button
             className="btn-ctrl"
             onClick={handleExportAuditReport}
             style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#0284c7', color: '#ffffff', borderColor: '#0284c7', fontWeight: 600 }}
           >
-            <Download size={14} /> Export Audit Report (JSON)
+            <Download size={14} /> Export Audit JSON
           </button>
           <div className="live-badge">
             <span className="live-dot"></span> LIVE STREAM ACTIVE
@@ -180,7 +178,6 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
 
         {/* Column 2: Identity Resolution & Patient State */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Identity Resolution Card */}
           <div className="card-panel">
             <div className="card-title">
               <Fingerprint size={18} color="#0284c7" /> Identity Resolution
@@ -205,10 +202,8 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
             </div>
           </div>
 
-          {/* Current Patient State Card */}
           <div className="card-panel" style={{ flex: 1 }}>
             <div className="card-title">Current Patient State</div>
-
             <div className="vitals-row">
               <div className={`vital-box ${activeSpo2 < 90 ? 'alert' : ''}`}>
                 <div className="vital-label">Latest SpO2</div>
@@ -233,7 +228,6 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
 
         {/* Column 3: Decision Banner, Logic & Audit Trail */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
-          {/* Large Emergency Banner */}
           {activeDecision === 'EMERGENCY' ? (
             <div className="banner-emergency">
               <AlertTriangle size={26} /> ▲ EMERGENCY
@@ -248,7 +242,6 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
             </div>
           )}
 
-          {/* Decision Logic Card */}
           <div className="card-panel">
             <div className="card-title">Decision Logic</div>
             <div style={{ borderLeft: '4px solid #ef4444', paddingLeft: '0.75rem', fontSize: '0.825rem', color: '#334155', lineHeight: '1.4' }}>
@@ -258,7 +251,6 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
             </div>
           </div>
 
-          {/* Audit Trail Card */}
           <div className="card-panel" style={{ flex: 1 }}>
             <div className="card-title">Audit Trail</div>
             <table className="audit-table">
@@ -288,6 +280,14 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
           </div>
         </div>
       </div>
+
+      {/* Video Playback Modal */}
+      <VideoPlaybackModal
+        isOpen={isVideoModalOpen}
+        onClose={() => setIsVideoModalOpen(false)}
+        session={currentSession}
+        currentUser={currentUser}
+      />
 
       {/* Bottom Control Bar */}
       <div className="control-bar">
