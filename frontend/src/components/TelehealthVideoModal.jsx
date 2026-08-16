@@ -3,6 +3,9 @@ import { X, Video, Mic, MicOff, PhoneOff, VideoOff, Activity, Send, CheckCircle2
 import { sendEvent, fetchTriage } from '../api/client';
 
 export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated }) {
+  const [patientName, setPatientName] = useState('John Doe');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [mobileNum, setMobileNum] = useState('9811022334');
   const [micMuted, setMicMuted] = useState(false);
   const [videoOff, setVideoOff] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
@@ -18,12 +21,16 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
   const recordedChunksRef = useRef([]);
   const micStreamRef = useRef(null);
 
+  const handleMobileChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setMobileNum(val);
+  };
+
   useEffect(() => {
     let animationFrameId = null;
     recordedChunksRef.current = [];
 
     if (isOpen) {
-      // 1. Capture user's microphone & webcam audio/video
       navigator.mediaDevices?.getUserMedia({ video: true, audio: true })
         .then((s) => {
           micStreamRef.current = s;
@@ -61,11 +68,9 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
         const drawFrame = () => {
           if (!canvas) return;
 
-          // Pure Dark Clinical Grid Background
           ctx.fillStyle = '#090d16';
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-          // Grid Lines
           ctx.strokeStyle = 'rgba(255,255,255,0.04)';
           ctx.lineWidth = 1;
           for (let x = 0; x < canvas.width; x += 40) {
@@ -89,7 +94,6 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
             ctx.fillText('LIVE TELEHEALTH CLINICAL STREAM', canvas.width / 2, canvas.height / 2 + 45);
           }
 
-          // Live ECG Waveform
           angle += 0.05;
           ctx.strokeStyle = Number(spo2) < 90 ? '#ef4444' : '#16a34a';
           ctx.lineWidth = 2.5;
@@ -101,7 +105,6 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
           }
           ctx.stroke();
 
-          // Overlay Telehealth Status Text
           ctx.fillStyle = '#ffffff';
           ctx.font = 'bold 14px Inter, sans-serif';
           ctx.textAlign = 'left';
@@ -114,8 +117,6 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
 
         try {
           const combinedStream = canvas.captureStream(30);
-
-          // Add user's real microphone audio track so whatever the user speaks is recorded!
           if (userStream && userStream.getAudioTracks().length > 0) {
             const audioTrack = userStream.getAudioTracks()[0];
             combinedStream.addTrack(audioTrack);
@@ -152,13 +153,18 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
 
   const handleSubmitTelehealthIntake = async (e) => {
     e.preventDefault();
+
+    if (mobileNum.length !== 10) {
+      alert('⚠️ Invalid Phone Number: Mobile number must be exactly 10 digits.');
+      return;
+    }
+
     setLoading(true);
 
     const sessionId = `TRG-${Math.floor(100 + Math.random() * 900)}V`;
     const patientId = `P-${Math.floor(10000 + Math.random() * 90000)}`;
 
     let videoUrl = null;
-
     if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
     }
@@ -172,6 +178,8 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
       }
     }
 
+    const fullPhone = `${countryCode} ${mobileNum}`;
+
     try {
       // 1. Send Audio/Video Text Event
       await sendEvent({
@@ -181,8 +189,8 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
         session_id: sessionId,
         patient_id: patientId,
         data: {
-          patient_name: 'John Doe (Telehealth Video)',
-          phone: '+1 (555) 019-2834',
+          patient_name: patientName,
+          phone: fullPhone,
           symptoms: clinicalNotes
         }
       });
@@ -208,8 +216,8 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
           sessionId,
           patientId,
           formData: {
-            patientName: 'John Doe (Telehealth Video)',
-            phone: '+1 (555) 019-2834',
+            patientName: patientName,
+            phone: fullPhone,
             symptoms: clinicalNotes,
             spo2,
             hr,
@@ -248,7 +256,7 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
       <div style={{
         background: '#0f172a',
         borderRadius: '20px',
-        width: '780px',
+        width: '820px',
         padding: '1.75rem',
         boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
         border: '1px solid rgba(255,255,255,0.12)',
@@ -261,17 +269,17 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
             <span style={{ width: 10, height: 10, background: '#ef4444', borderRadius: '50%', animation: 'pulse 1.5s infinite' }}></span>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>● RECORDING LIVE Telehealth Video Call: John Doe (#8842)</h3>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>● RECORDING LIVE Telehealth Video Call: {patientName}</h3>
           </div>
           <X size={20} style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={onClose} />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr', gap: '1.25rem' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1.3fr 1.1fr', gap: '1.25rem' }}>
           {/* Left Column: Live Video Canvas */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
             <div style={{
               width: '100%',
-              height: '280px',
+              height: '310px',
               background: '#090d16',
               borderRadius: '14px',
               position: 'relative',
@@ -299,7 +307,7 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
               </div>
 
               <div style={{ position: 'absolute', bottom: 12, left: 12, background: 'rgba(15, 23, 42, 0.85)', padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}>
-                John Doe (Patient Telehealth Feed - Recording Active)
+                {patientName} ({countryCode} {mobileNum})
               </div>
             </div>
 
@@ -336,23 +344,64 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
           </div>
 
           {/* Right Column: Interactive Clinical Telehealth Intake Form */}
-          <form onSubmit={handleSubmitTelehealthIntake} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+          <form onSubmit={handleSubmitTelehealthIntake} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#a5b4fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              📝 Live Video Clinical Intake
+              📝 Telehealth Patient Info & Intake
             </div>
 
             <div>
-              <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '0.25rem' }}>
+              <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Patient Full Name</label>
+              <input
+                type="text"
+                style={{ width: '100%', background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', padding: '0.4rem 0.6rem', color: '#ffffff', fontSize: '0.85rem' }}
+                value={patientName}
+                onChange={(e) => setPatientName(e.target.value)}
+                required
+              />
+            </div>
+
+            {/* Separate Row for Country Code & 10-Digit Mobile Number */}
+            <div>
+              <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>Mobile Number (10 Digits)</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: '0.4rem' }}>
+                <select
+                  style={{ background: 'rgba(0,0,0,0.4)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', padding: '0.4rem', color: '#ffffff', fontSize: '0.8rem', cursor: 'pointer' }}
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                >
+                  <option value="+91">🇮🇳 +91</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+61">🇦🇺 +61</option>
+                  <option value="+81">🇯🇵 +81</option>
+                  <option value="+49">🇩🇪 +49</option>
+                  <option value="+971">🇦🇪 +971</option>
+                </select>
+
+                <input
+                  type="text"
+                  style={{ width: '100%', background: 'rgba(0,0,0,0.4)', border: mobileNum.length > 0 && mobileNum.length < 10 ? '1px solid #ef4444' : '1px solid rgba(255,255,255,0.15)', borderRadius: '6px', padding: '0.4rem 0.6rem', color: '#ffffff', fontSize: '0.85rem' }}
+                  placeholder="10-digit mobile number"
+                  value={mobileNum}
+                  onChange={handleMobileChange}
+                  maxLength={10}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.75rem', color: '#94a3b8', display: 'block', marginBottom: '0.2rem' }}>
                 Telehealth Symptom Notes
               </label>
               <textarea
                 style={{
                   width: '100%',
-                  height: '110px',
+                  height: '75px',
                   background: 'rgba(0,0,0,0.4)',
                   border: '1px solid rgba(255,255,255,0.15)',
                   borderRadius: '8px',
-                  padding: '0.6rem',
+                  padding: '0.5rem',
                   color: '#ffffff',
                   fontSize: '0.8rem',
                   resize: 'none'
@@ -393,7 +442,7 @@ export default function TelehealthVideoModal({ isOpen, onClose, onSessionCreated
             <button
               type="submit"
               className="btn-primary"
-              style={{ marginTop: '0.5rem', padding: '0.65rem', justifyContent: 'center', fontSize: '0.85rem' }}
+              style={{ marginTop: '0.35rem', padding: '0.65rem', justifyContent: 'center', fontSize: '0.85rem' }}
               disabled={loading}
             >
               <Send size={14} /> {loading ? 'Saving Video...' : 'Submit & Save Video Intake'}

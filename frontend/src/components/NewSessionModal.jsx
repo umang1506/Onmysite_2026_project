@@ -4,7 +4,8 @@ import { sendEvent, fetchTriage } from '../api/client';
 
 export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
   const [patientName, setPatientName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [mobileNum, setMobileNum] = useState('');
   const [symptoms, setSymptoms] = useState('');
   const [spo2, setSpo2] = useState('88');
   const [hr, setHr] = useState('112');
@@ -15,8 +16,13 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
 
   if (!isOpen) return null;
 
+  const handleMobileChange = (e) => {
+    // Restrict strictly to digits and max 10 characters
+    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setMobileNum(val);
+  };
+
   const handleVoiceRecord = () => {
-    // 1. Check for Browser SpeechRecognition API support
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
     if (SpeechRecognition) {
@@ -45,23 +51,15 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
           setSource('audio');
         };
 
-        recognition.onerror = () => {
-          setIsRecording(false);
-        };
-
-        recognition.onend = () => {
-          setIsRecording(false);
-        };
+        recognition.onerror = () => setIsRecording(false);
+        recognition.onend = () => setIsRecording(false);
 
         recognitionRef.current = recognition;
         recognition.start();
         return;
-      } catch (e) {
-        // Fallback to simulated audio if browser blocks speech recognition
-      }
+      } catch (e) {}
     }
 
-    // 2. Simulated Speech-to-Text Fallback
     setIsRecording(true);
     setSymptoms('Listening to voice audio intake...');
     setTimeout(() => {
@@ -73,13 +71,21 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (mobileNum.length !== 10) {
+      alert('⚠️ Invalid Phone Number: Mobile number must be exactly 10 digits.');
+      return;
+    }
+
     setLoading(true);
     const sessionId = `TRG-${Math.floor(100 + Math.random() * 900)}X`;
     const patientId = `P-${Math.floor(10000 + Math.random() * 90000)}`;
 
+    const fullPhone = `${countryCode} ${mobileNum}`;
+
     const formData = {
       patientName: patientName || 'John Doe',
-      phone: phone || '+1-555-0192',
+      phone: fullPhone,
       symptoms: symptoms || 'Patient states chest pain began abruptly 20 minutes ago.',
       spo2,
       hr,
@@ -146,7 +152,7 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
       <div style={{
         background: '#ffffff',
         borderRadius: '12px',
-        width: '500px',
+        width: '520px',
         padding: '1.5rem',
         boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
         border: '1px solid #e2e8f0'
@@ -166,33 +172,60 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
               placeholder="e.g. John Doe"
               value={patientName}
               onChange={(e) => setPatientName(e.target.value)}
+              required
             />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.3rem' }}>Phone Number</label>
+          {/* Dedicated Separate Fields for Country Code & 10-Digit Mobile Number */}
+          <div>
+            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.3rem' }}>
+              Mobile Phone Number (Strictly 10 Digits)
+            </label>
+            <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '0.5rem' }}>
+              <select
+                className="search-input"
+                style={{ cursor: 'pointer', fontWeight: 600 }}
+                value={countryCode}
+                onChange={(e) => setCountryCode(e.target.value)}
+              >
+                <option value="+91">🇮🇳 +91 (IN)</option>
+                <option value="+1">🇺🇸 +1 (US)</option>
+                <option value="+44">🇬🇧 +44 (UK)</option>
+                <option value="+61">🇦🇺 +61 (AU)</option>
+                <option value="+81">🇯🇵 +81 (JP)</option>
+                <option value="+49">🇩🇪 +49 (DE)</option>
+                <option value="+971">🇦🇪 +971 (UAE)</option>
+              </select>
+
               <input
                 type="text"
                 className="search-input"
-                style={{ width: '100%' }}
-                placeholder="+1-555-0192"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                style={{ width: '100%', borderColor: mobileNum.length > 0 && mobileNum.length < 10 ? '#ef4444' : '#cbd5e1' }}
+                placeholder="10-digit mobile number (e.g. 9811022334)"
+                value={mobileNum}
+                onChange={handleMobileChange}
+                maxLength={10}
+                required
               />
             </div>
-            <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.3rem' }}>Input Modality</label>
-              <select
-                className="search-input"
-                style={{ width: '100%' }}
-                value={source}
-                onChange={(e) => setSource(e.target.value)}
-              >
-                <option value="audio">Audio Transcription</option>
-                <option value="text">Text Report</option>
-              </select>
-            </div>
+            {mobileNum.length > 0 && mobileNum.length < 10 && (
+              <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 600, marginTop: '0.2rem', display: 'block' }}>
+                ⚠️ Mobile number must be exactly 10 digits ({mobileNum.length}/10)
+              </span>
+            )}
+          </div>
+
+          <div>
+            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.3rem' }}>Input Modality</label>
+            <select
+              className="search-input"
+              style={{ width: '100%' }}
+              value={source}
+              onChange={(e) => setSource(e.target.value)}
+            >
+              <option value="audio">Audio Transcription</option>
+              <option value="text">Text Report</option>
+            </select>
           </div>
 
           <div>
@@ -214,6 +247,7 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
               placeholder="Patient states chest pain began abruptly 20 minutes ago..."
               value={symptoms}
               onChange={(e) => setSymptoms(e.target.value)}
+              required
             />
           </div>
 
