@@ -8,6 +8,7 @@ import PatientRecordsView from './components/PatientRecordsView';
 import SystemHealthView from './components/SystemHealthView';
 import DirectAdmissionsView from './components/DirectAdmissionsView';
 import StaffingView from './components/StaffingView';
+import LoginPage from './components/LoginPage';
 
 import NewSessionModal from './components/NewSessionModal';
 import SettingsModal from './components/SettingsModal';
@@ -18,6 +19,9 @@ import TelehealthVideoModal from './components/TelehealthVideoModal';
 import UserProfileModal from './components/UserProfileModal';
 
 export default function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+
   const [activeNav, setActiveNav] = useState('triage-feed');
   const [activeHeaderTab, setActiveHeaderTab] = useState('ED Queue');
   const [searchQuery, setSearchQuery] = useState('');
@@ -145,6 +149,23 @@ export default function App() {
     { id: 'P-11204', name: 'Robert Johnson', age: '82M', phone: '+1 (555) 881-0021', dob: '01/10/1942', matchScore: '91%', lastVisit: '2026-08-16 09:15', status: 'Discharged' }
   ]);
 
+  const handleLogin = (userAccount) => {
+    setCurrentUser(userAccount);
+    setIsAuthenticated(true);
+
+    // Set initial default nav per role
+    if (userRole === 'admin') {
+      setActiveNav('dashboard');
+    } else {
+      setActiveNav('triage-feed');
+    }
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setCurrentUser(null);
+  };
+
   const handleSelectSession = (sessionId) => {
     setSelectedSessionId(sessionId);
     setActiveHeaderTab('ED Queue');
@@ -233,6 +254,14 @@ export default function App() {
     setActiveNav('triage-feed');
   };
 
+  // Step 1: Render Login Page if Unauthenticated
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={handleLogin} />;
+  }
+
+  // Step 2: Render Authenticated Role-Based Portal
+  const userRole = currentUser?.id || 'physician';
+
   return (
     <div className="app-layout">
       {/* Left Sidebar */}
@@ -244,7 +273,8 @@ export default function App() {
         }}
         onNewSession={() => setIsNewSessionOpen(true)}
         onOpenSettings={() => setIsSettingsOpen(true)}
-        onOpenSupport={() => setIsSupportOpen(false || true)}
+        onOpenSupport={() => setIsSupportOpen(true)}
+        currentUser={currentUser}
       />
 
       {/* Main Content Area */}
@@ -263,21 +293,23 @@ export default function App() {
           onOpenNetwork={() => setIsNetworkOpen(true)}
           onOpenVideo={() => setIsVideoOpen(true)}
           onOpenProfile={() => setIsProfileOpen(true)}
+          currentUser={currentUser}
+          onLogout={handleLogout}
         />
 
         <main className="content-body">
           {/* Top Header Tab Switcher Override */}
-          {activeHeaderTab === 'Direct Admissions' ? (
+          {activeHeaderTab === 'Direct Admissions' && userRole === 'physician' ? (
             <DirectAdmissionsView />
-          ) : activeHeaderTab === 'Staffing' ? (
+          ) : activeHeaderTab === 'Staffing' && ['physician', 'admin'].includes(userRole) ? (
             <StaffingView />
           ) : (
             <>
-              {activeNav === 'dashboard' && (
+              {activeNav === 'dashboard' && ['physician', 'admin'].includes(userRole) && (
                 <DashboardView onNavigate={(nav) => setActiveNav(nav)} />
               )}
 
-              {activeNav === 'triage-feed' && (
+              {activeNav === 'triage-feed' && ['physician', 'nurse', 'psychiatrist'].includes(userRole) && (
                 <TriageFeedView
                   sessions={sessions}
                   activeSessionId={selectedSessionId}
@@ -293,14 +325,14 @@ export default function App() {
                 />
               )}
 
-              {activeNav === 'patient-records' && (
+              {activeNav === 'patient-records' && ['physician', 'nurse', 'psychiatrist'].includes(userRole) && (
                 <PatientRecordsView
                   records={patientRecords}
                   searchQuery={searchQuery}
                 />
               )}
 
-              {activeNav === 'system-health' && (
+              {activeNav === 'system-health' && ['physician', 'admin'].includes(userRole) && (
                 <SystemHealthView />
               )}
             </>
@@ -343,6 +375,8 @@ export default function App() {
       <UserProfileModal
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
+        currentUser={currentUser}
+        onLogout={handleLogout}
       />
     </div>
   );

@@ -1,14 +1,20 @@
 import React from 'react';
 import { LayoutDashboard, Radio, FolderHeart, Activity, Layers, Settings, HelpCircle, Plus } from 'lucide-react';
 
-export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenSettings, onOpenSupport }) {
-  const navItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'triage-feed', label: 'Triage Feed', icon: Radio },
-    { id: 'patient-records', label: 'Patient Records', icon: FolderHeart },
-    { id: 'system-health', label: 'System Health', icon: Activity },
-    { id: 'session-overview', label: 'Session Overview', icon: Layers },
+export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenSettings, onOpenSupport, currentUser }) {
+  const allNavItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['physician', 'admin'] },
+    { id: 'triage-feed', label: 'Triage Feed', icon: Radio, roles: ['physician', 'nurse', 'psychiatrist'] },
+    { id: 'patient-records', label: 'Patient Records', icon: FolderHeart, roles: ['physician', 'nurse', 'psychiatrist'] },
+    { id: 'system-health', label: 'System Health', icon: Activity, roles: ['physician', 'admin'] },
+    { id: 'session-overview', label: 'Session Overview', icon: Layers, roles: ['physician', 'nurse', 'psychiatrist', 'admin'] },
   ];
+
+  const userRole = currentUser?.id || 'physician';
+  const allowedNavItems = allNavItems.filter((item) => item.roles.includes(userRole));
+
+  const canCreateSession = ['physician', 'nurse'].includes(userRole);
+  const canAccessSettings = ['physician', 'admin'].includes(userRole);
 
   return (
     <aside className="sidebar">
@@ -17,16 +23,22 @@ export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenS
           <div className="brand-icon">🏥</div>
           <div>
             <div className="brand-name">Triage Command</div>
-            <div className="brand-sub">Unit 7-B Center</div>
+            <div className="brand-sub">{currentUser?.dept || 'Unit 7-B Center'}</div>
           </div>
         </div>
 
-        <button className="btn-new-session" onClick={onNewSession}>
-          <Plus size={18} /> + New Triage Session
-        </button>
+        {canCreateSession ? (
+          <button className="btn-new-session" onClick={onNewSession}>
+            <Plus size={18} /> + New Triage Session
+          </button>
+        ) : (
+          <div style={{ padding: '0.5rem 0.75rem', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.75rem', color: '#64748b', marginBottom: '1.25rem', textAlign: 'center' }}>
+            🔒 Role: {currentUser?.role}
+          </div>
+        )}
 
         <nav className="nav-section">
-          {navItems.map((item) => {
+          {allowedNavItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeNav === item.id;
             return (
@@ -44,10 +56,12 @@ export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenS
       </div>
 
       <div className="nav-section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-        <div className="nav-item" onClick={onOpenSettings}>
-          <Settings size={18} />
-          <span>Settings</span>
-        </div>
+        {canAccessSettings && (
+          <div className="nav-item" onClick={onOpenSettings}>
+            <Settings size={18} />
+            <span>Settings</span>
+          </div>
+        )}
         <div className="nav-item" onClick={onOpenSupport}>
           <HelpCircle size={18} />
           <span>Support</span>
