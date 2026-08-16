@@ -1,18 +1,37 @@
-# 🏥 Onmysite — Deterministic Clinical Triage & Event Reconciliation System
+# 🏥 Onmysite — Clinical Intelligence & Deterministic Triage Gateway
 
-A production-grade, deterministic clinical triage engine designed to process multimodal incoming patient events (audio transcriptions, patient text messages, IoT sensor telemetry), resolve patient identity and out-of-order temporal conflicts, enforce decision gates, maintain immutable audit trails, and support 100% repeatable event replays.
+A production-grade, deterministic clinical triage engine and real-time Emergency Department portal designed to process multimodal incoming patient events (voice speech transcriptions, patient text reports, IoT sensor telemetry), resolve patient identity and out-of-order temporal conflicts, enforce decision holding gates, maintain immutable audit trails, and support 100% repeatable event replays.
 
 ---
 
-## 🌟 Key Features
+## 🌟 Key Platform Features
 
-1. **Multimodal Event Ingestion**: Ingests `sensor` (heart rate, SpO₂), `text`, and `audio` inputs with schema validation and idempotency protection.
-2. **Deterministic Identity Resolution**: Scores patient identity using normalized phone numbers (+0.4), Levenshtein string distance on names (+0.3), symptom pattern overlap (+0.2), and exact `patient_id` matches (+1.0) without non-deterministic ML.
-3. **Temporal Conflict Reconciliation**: Sorts events strictly by ISO 8601 timestamps (`new Date(ts).getTime()`). Out-of-order events update state according to real-world occurrence time rather than arrival sequence.
-4. **Priority Conflict Engine**: Emergency sensor vitals (SpO₂ < 90%, HR > 150 or < 40 bpm) override conflicting non-emergency patient text reports with dynamic value interpolation.
-5. **"Hanging Session" Timeout Edge Case**: Flag sessions sitting past 5 minutes without required sensor telemetry as `"Pending - Incomplete Data (Timeout)"`.
-6. **Decision Gate & Dynamic Audit Trail**: Requires multimodal evidence before issuing triage decisions. Records structured audit logs for every state transition.
-7. **Replay Simulator**: Isolated execution engine guarantees identical decision output across repeated runs of fixture data.
+### 1. Deterministic Core Engine & Reconciliation
+- **Multimodal Event Ingestion**: Processes `sensor` (heart rate, SpO₂), `text`, and `audio` inputs with schema validation and strict idempotency protection.
+- **Deterministic Identity Resolution**: Scores identity using normalized phone numbers (+0.4), Levenshtein string distance on names (+0.3), symptom pattern overlap (+0.2), and exact `patient_id` matches (+1.0) without non-deterministic ML models.
+- **Temporal Reconciliation**: Sorts events strictly by ISO 8601 timestamps (`new Date(ts).getTime()`). Out-of-order events update state according to real-world occurrence time rather than arrival sequence.
+- **Priority Emergency Overrides**: Emergency sensor vitals (SpO₂ < 90%, HR > 150 or < 40 bpm) override conflicting non-emergency patient text reports with dynamic value interpolation.
+- **Incomplete Data Holding Gates**: Automatically pauses triage evaluation if text symptoms are submitted but vital telemetry (SpO₂ / HR) has not arrived yet.
+- **Intake State Machine Journey**: Tracks patient progression across 5 distinct states (`GREETING` ➔ `SYMPTOM_COLLECTION` ➔ `AWAITING_VITALS` ➔ `TRIAGE_READY` ➔ `TRIAGE_COMPLETED`).
+- **Modality Normalization & Keyword Triage Charting**: Strips conversational filler words (`"uh"`, `"um"`, `"like"`, `"you know"`, `"basically"`) from transcripts and compiles structured tags (`critical_respiratory`, `cardiac_distress`, `mental_health_crisis`, `general_pain`).
+- **Replay Simulator**: Isolated execution engine guarantees identical decision output across repeated runs of fixture data.
+
+### 2. Smart AI Clinical Receptionist Desk
+- **Phone Restriction & Country Code Selector**: Enforces strict **10-digit mobile number validation** paired with country code selection (`+91 India`, `+1 USA`, `+44 UK`, `+61 AU`, `+971 UAE`).
+- **Multilingual Voice Intake**: Supports live Speech-to-Text recording in **English, Hindi (हिंदी), Spanish (Español), and French (Français)** via native Web Speech API.
+- **Automated Patient History Lookup**: Queries past hospital records automatically to display chronic conditions (e.g. *Hypertension*) and allergies (*Penicillin, Latex*).
+- **Insurance Pre-Authorization Scanner**: Instant eligibility verification for *Ayushman Bharat (PMJAY Cashless)*, *Star Health*, *HDFC ERGO*, and *Medicare*.
+- **Smart Specialist Assignment**: Automatically assigns lead duty specialists (*Dr. Alex Rivera - Cardiology Lead*, *Dr. Priya Nair - Psychiatrist*, *Dr. Elena Rostova - General Medicine*).
+- **Instant Token Generator & Slip Printing**: Generates token numbers (e.g. `TK-842`) and printable intake token slips.
+
+### 3. Telehealth Video Intake & HIPAA Security (RBAC)
+- **30 FPS Canvas Stream Video Recorder**: Records telehealth calls combining live video stream and user microphone audio track into WebM video blobs.
+- **Role-Based Access Control (RBAC)**: ED Physicians & Intake Nurses can view and play back recorded videos; IT Admins are restricted under HIPAA security rules.
+
+### 4. Hospital Capacity & Medication Safety Tools
+- **Live Hospital Bed Capacity Tracker**: Monitors real-time availability for ICU Resuscitation Bays, ED Trauma Bays, and Psychiatric Crisis Units with **1-Click Bed Reservation**.
+- **Emergency Medication Checker**: Real-time Drug-Drug interaction safety analyzer for *Aspirin, Warfarin, Heparin, Nitroglycerin, Morphine* with hemorrhage and hypotension alert warnings.
+- **1-Click Printable EMR Sheet Exporter (< 10ms)**: Generates official printable Emergency Department EMR Summary Sheets with digital physician signature blocks and instant PDF file download.
 
 ---
 
@@ -26,24 +45,33 @@ Onmysite/
 │   │   ├── routes/
 │   │   │   ├── events.js             # POST /events endpoint
 │   │   │   ├── triage.js             # POST /triage endpoint
-│   │   │   └── replay.js             # POST /replay endpoint
+│   │   │   ├── replay.js             # POST /replay endpoint
+│   │   │   └── chat.js               # POST /chat Gemini & Assistant endpoint
 │   │   ├── engine/
-│   │   │   ├── triageEngine.js       # Main orchestrator
+│   │   │   ├── triageEngine.js       # Main orchestrator & state machine
 │   │   │   ├── identityResolver.js   # Scoring-based identity matcher
-│   │   │   ├── temporalReconciler.js # Timestamp-based sorter & state merger
-│   │   │   ├── conflictResolver.js   # Priority conflict resolver
-│   │   │   └── triageRules.js        # Deterministic rules & gate checks
+      │   │   ├── temporalReconciler.js # Timestamp-based sorter & state merger
+      │   │   ├── conflictResolver.js   # Priority conflict resolver
+      │   │   ├── triageRules.js        # Rules, holding gates & decision checks
+      │   │   └── dataParser.js         # Normalizer, keyword charter & clarification prompts
 │   │   ├── store/
-│   │   │   └── sessionStore.js       # In-memory session manager
+│   │   │   └── sessionStore.js       # In-memory session state store
 │   │   └── utils/
-│   │       ├── auditTrail.js         # Audit logging utilities
+│   │       ├── auditTrail.js         # Immutable audit logging utilities
 │   │       └── stringUtils.js        # Levenshtein distance & normalization
-│   ├── tests/                        # Automated Jest test suite (6 categories)
+│   ├── tests/                        # Automated Jest test suite
 │   └── package.json
 ├── frontend/                         # React + Vite Glassmorphism Dashboard
 │   ├── src/
 │   │   ├── App.jsx
 │   │   ├── components/
+│   │   │   ├── AiReceptionistModal.jsx       # Smart AI Receptionist Desk
+│   │   │   ├── BedCapacityModal.jsx          # Live Hospital Bed Capacity Desk
+│   │   │   ├── MedicationCheckerModal.jsx    # Emergency Drug Interaction Checker
+│   │   │   ├── EmrReportExporterModal.jsx   # 1-Click Printable EMR Sheet
+│   │   │   ├── TelehealthVideoModal.jsx      # 30fps Video Call & Audio Recorder
+│   │   │   ├── VideoPlaybackModal.jsx        # Role-restricted Video Player
+│   │   │   └── ClinicalChatbot.jsx           # AI Clinical Assistant Chatbot
 │   │   └── api/client.js
 │   └── package.json
 ├── fixtures/                         # 7 Authentic clinical edge-case JSON files
@@ -99,7 +127,7 @@ npm run dev:frontend
 
 ## 🧪 Running Automated Tests
 
-Run the full Jest test suite covering identity resolution, conflict resolution, idempotency, emergency overrides, hanging session timeouts, and replay determinism:
+Run the full Jest test suite covering identity resolution, conflict resolution, idempotency, emergency overrides, hanging session timeouts, holding gates, and replay determinism:
 
 ```bash
 npm test
@@ -140,15 +168,16 @@ curl -X POST http://localhost:3000/events \
     "session_id": "sess_demo_1",
     "patient_id": "P-9001",
     "data": {
-      "patient_name": "Rohan Sharma",
-      "symptoms": "Experiencing mild headache"
+      "patient_name": "Aarav Sharma",
+      "phone": "+91 9811022334",
+      "symptoms": "Experiencing mild chest tightness"
     }
   }'
 ```
 
 ---
 
-### 2. Ingest Sensor Event (`POST /events`)
+### 2. Ingest Sensor Telemetry Event (`POST /events`)
 
 ```bash
 curl -X POST http://localhost:3000/events \
@@ -178,7 +207,7 @@ curl -X POST http://localhost:3000/triage \
 
 ---
 
-### 4. Replay Events (`POST /replay`)
+### 4. Replay Event Sequence (`POST /replay`)
 
 ```bash
 curl -X POST http://localhost:3000/replay \
@@ -190,17 +219,6 @@ curl -X POST http://localhost:3000/replay \
     ]
   }'
 ```
-
----
-
-## 🌐 Live Deployment Readiness (Vercel)
-
-The React frontend is configured for instant deployment to Vercel:
-
-1. Push your code to your GitHub repo `https://github.com/umang1506/Onmysite_2026_project.git`.
-2. Connect your repo in [Vercel Dashboard](https://vercel.com).
-3. Set Root Directory to `frontend`.
-4. Set Build Command to `npm run build` and Output Directory to `dist`.
 
 ---
 
