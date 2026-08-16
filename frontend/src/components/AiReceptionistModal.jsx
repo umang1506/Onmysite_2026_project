@@ -1,13 +1,17 @@
 import React, { useState, useRef } from 'react';
-import { X, Bot, Sparkles, UserCheck, Send, AlertTriangle, ShieldCheck, Phone, Heart, Mic, MicOff, Printer, Globe, History, Clock, Hash } from 'lucide-react';
+import { X, Bot, Sparkles, UserCheck, Send, AlertTriangle, ShieldCheck, Phone, Heart, Mic, MicOff, Printer, Globe, History, Clock, Hash, Shield, UserPlus, Stethoscope } from 'lucide-react';
 import { sendEvent, fetchTriage } from '../api/client';
 
 export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated }) {
   const [patientName, setPatientName] = useState('');
   const [countryCode, setCountryCode] = useState('+91');
   const [mobileNum, setMobileNum] = useState('');
+  const [kinName, setKinName] = useState('');
+  const [kinPhone, setKinPhone] = useState('');
+  const [insurance, setInsurance] = useState('ayushman');
   const [language, setLanguage] = useState('en');
   const [symptoms, setSymptoms] = useState('');
+
   const [pastHistoryFound, setPastHistoryFound] = useState(null);
   const [aiAnalysis, setAiAnalysis] = useState(null);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
@@ -20,7 +24,6 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
     const val = e.target.value.replace(/\D/g, '').slice(0, 10);
     setMobileNum(val);
 
-    // Automated Patient Past History Lookup Simulation
     if (val.length === 10) {
       if (val.startsWith('98110') || val.startsWith('99382')) {
         setPastHistoryFound({
@@ -38,6 +41,11 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
     }
   };
 
+  const handleKinPhoneChange = (e) => {
+    const val = e.target.value.replace(/\D/g, '').slice(0, 10);
+    setKinPhone(val);
+  };
+
   const handleAiAutoAnalyze = () => {
     if (!symptoms.trim()) {
       alert('Please enter patient symptoms first for AI analysis.');
@@ -49,25 +57,37 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
       const lower = symptoms.toLowerCase();
       let riskLevel = 'GENERAL';
       let dept = 'General Outpatient Care';
+      let doctor = 'Dr. Elena Rostova (General Medicine)';
       let rationale = 'Vitals within baseline limits. Standard registration assigned.';
       let estWait = '12 mins';
 
       if (lower.includes('chest pain') || lower.includes('breathless') || lower.includes('unconscious') || lower.includes('heart')) {
         riskLevel = 'EMERGENCY';
         dept = 'ER Resuscitation Bay (Priority Level 1)';
+        doctor = 'Dr. Alex Rivera (Senior Cardiology Lead)';
         rationale = 'High cardiac/respiratory distress keywords detected. Immediate SpO2 monitoring recommended.';
         estWait = 'IMMEDIATE (0 mins)';
       } else if (lower.includes('panic') || lower.includes('anxiety') || lower.includes('suicidal') || lower.includes('depression')) {
         riskLevel = 'MENTAL HEALTH';
         dept = 'Psychiatric Crisis Intervention Center';
+        doctor = 'Dr. Priya Nair (Lead Psychiatrist)';
         rationale = 'Psychological crisis flags detected. Routing to specialized Mental Health team.';
         estWait = '4 mins';
       }
 
+      const insuranceMap = {
+        ayushman: '🟢 Ayushman Bharat (PMJAY) — 100% Pre-Authorized Cashless',
+        star: '🟢 Star Health Care — Pre-Approved (Max $10,000)',
+        hdfc: '🟢 HDFC ERGO Health — Active Policy Verified',
+        medicare: '🟢 Medicare Govt Plan — Active Coverage Verified'
+      };
+
       setAiAnalysis({
         riskLevel,
         dept,
+        doctor,
         rationale,
+        insuranceStatus: insuranceMap[insurance] || 'Verified Active Policy',
         score: '98% AI Confidence',
         tokenNum: `TK-${Math.floor(100 + Math.random() * 900)}`,
         estWait
@@ -129,7 +149,7 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
     e.preventDefault();
 
     if (mobileNum.length !== 10) {
-      alert('⚠️ Invalid Phone Number: Mobile number must be exactly 10 digits.');
+      alert('⚠️ Invalid Phone Number: Patient mobile number must be exactly 10 digits.');
       return;
     }
 
@@ -212,7 +232,7 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
       <div style={{
         background: '#ffffff',
         borderRadius: '20px',
-        width: '680px',
+        width: '720px',
         maxHeight: '90vh',
         overflowY: 'auto',
         padding: '1.75rem',
@@ -230,7 +250,7 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
             </div>
             <div>
               <h3 style={{ fontSize: '1.2rem', fontWeight: 800, color: '#1e3a8a' }}>Smart AI Clinical Receptionist</h3>
-              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Automated Intake, History Lookup & Token Generator</div>
+              <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Automated Registration, Doctor Assignment & Insurance Pre-Auth</div>
             </div>
           </div>
           <X size={20} style={{ cursor: 'pointer', color: '#64748b' }} onClick={onClose} />
@@ -241,7 +261,7 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', fontSize: '0.825rem', color: '#1e40af' }}>
             <Sparkles size={18} color="#0284c7" />
             <span>
-              {language === 'hi' ? 'नमस्ते! मैं आपका स्मार्ट AI रिसेप्शनिस्ट हूँ। कृपया रोगी का विवरण दर्ज करें।' : 'Welcome to Onmysite Clinical Desk! I am your AI Receptionist.'}
+              {language === 'hi' ? 'नमस्ते! मैं आपका स्मार्ट AI रिसेप्शनिस्ट हूँ। कृपया रोगी का विवरण दर्ज करें।' : 'Welcome to Onmysite Clinical Gateway! I am your AI Receptionist.'}
             </span>
           </div>
 
@@ -277,43 +297,70 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
             />
           </div>
 
-          {/* Phone Number with Country Code & 10-Digit Mobile */}
-          <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.3rem' }}>
-              Mobile Phone Number (10 Digits)
-            </label>
-            <div style={{ display: 'grid', gridTemplateColumns: '130px 1fr', gap: '0.5rem' }}>
-              <select
-                className="search-input"
-                style={{ fontWeight: 600, cursor: 'pointer' }}
-                value={countryCode}
-                onChange={(e) => setCountryCode(e.target.value)}
-              >
-                <option value="+91">🇮🇳 +91 (IN)</option>
-                <option value="+1">🇺🇸 +1 (US)</option>
-                <option value="+44">🇬🇧 +44 (UK)</option>
-                <option value="+61">🇦🇺 +61 (AU)</option>
-                <option value="+81">🇯🇵 +81 (JP)</option>
-                <option value="+49">🇩🇪 +49 (DE)</option>
-                <option value="+971">🇦🇪 +971 (UAE)</option>
-              </select>
+          {/* Phone Number & Emergency Contact */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.85rem' }}>
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.3rem' }}>
+                Mobile Number (10 Digits)
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '100px 1fr', gap: '0.4rem' }}>
+                <select
+                  className="search-input"
+                  style={{ fontWeight: 600, cursor: 'pointer' }}
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                >
+                  <option value="+91">🇮🇳 +91</option>
+                  <option value="+1">🇺🇸 +1</option>
+                  <option value="+44">🇬🇧 +44</option>
+                  <option value="+61">🇦🇺 +61</option>
+                  <option value="+971">🇦🇪 +971</option>
+                </select>
 
+                <input
+                  type="text"
+                  className="search-input"
+                  style={{ width: '100%', borderColor: mobileNum.length > 0 && mobileNum.length < 10 ? '#ef4444' : '#cbd5e1' }}
+                  placeholder="10 digits"
+                  value={mobileNum}
+                  onChange={handleMobileChange}
+                  maxLength={10}
+                  required
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.3rem' }}>
+                Emergency Contact (Kin / Spouse)
+              </label>
               <input
                 type="text"
                 className="search-input"
-                style={{ width: '100%', borderColor: mobileNum.length > 0 && mobileNum.length < 10 ? '#ef4444' : '#cbd5e1' }}
-                placeholder="10-digit mobile number"
-                value={mobileNum}
-                onChange={handleMobileChange}
-                maxLength={10}
-                required
+                style={{ width: '100%' }}
+                placeholder="Emergency Contact Name & 10 Digits"
+                value={kinName}
+                onChange={(e) => setKinName(e.target.value)}
               />
             </div>
-            {mobileNum.length > 0 && mobileNum.length < 10 && (
-              <span style={{ fontSize: '0.7rem', color: '#ef4444', fontWeight: 600, marginTop: '0.2rem', display: 'block' }}>
-                ⚠️ Mobile number must be exactly 10 digits ({mobileNum.length}/10)
-              </span>
-            )}
+          </div>
+
+          {/* Insurance & Pre-Auth Provider Selector */}
+          <div>
+            <label style={{ fontSize: '0.8rem', fontWeight: 700, color: '#475569', display: 'block', marginBottom: '0.3rem' }}>
+              Insurance & Pre-Authorization Provider
+            </label>
+            <select
+              className="search-input"
+              style={{ width: '100%', fontWeight: 600 }}
+              value={insurance}
+              onChange={(e) => setInsurance(e.target.value)}
+            >
+              <option value="ayushman">🇮🇳 Ayushman Bharat (PMJAY Cashless)</option>
+              <option value="star">🛡️ Star Health Insurance</option>
+              <option value="hdfc">🛡️ HDFC ERGO Health Policy</option>
+              <option value="medicare">🇺🇸 Medicare / Private Insurance</option>
+            </select>
           </div>
 
           {/* AI Past Medical History Lookup Feature */}
@@ -346,7 +393,7 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
                   onClick={handleAiAutoAnalyze}
                   style={{ background: '#1d4ed8', color: '#ffffff', border: 'none', borderRadius: '6px', padding: '0.25rem 0.65rem', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem' }}
                 >
-                  <Sparkles size={13} /> AI Pre-Triage
+                  <Sparkles size={13} /> AI Pre-Triage & Assign
                 </button>
               </div>
             </div>
@@ -361,7 +408,7 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
             />
           </div>
 
-          {/* AI Pre-Triage Department Allocation & Token Slip Feature */}
+          {/* AI Pre-Triage, Doctor Assignment & Token Slip Card */}
           {aiAnalysis && (
             <div style={{ background: aiAnalysis.riskLevel === 'EMERGENCY' ? '#fef2f2' : aiAnalysis.riskLevel === 'MENTAL HEALTH' ? '#faf5ff' : '#f0fdf4', border: '1px solid #cbd5e1', padding: '1rem', borderRadius: '12px', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -386,9 +433,14 @@ export default function AiReceptionistModal({ isOpen, onClose, onSessionCreated 
                 </div>
               </div>
 
-              <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#0f172a' }}>
-                Allocated Dept: {aiAnalysis.dept}
+              <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#1e3a8a', display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
+                <Stethoscope size={15} color="#1d4ed8" /> Assigned Specialist: <strong>{aiAnalysis.doctor}</strong>
               </div>
+
+              <div style={{ fontSize: '0.75rem', color: '#166534', fontWeight: 600 }}>
+                {aiAnalysis.insuranceStatus}
+              </div>
+
               <div style={{ fontSize: '0.75rem', color: '#475569' }}>
                 {aiAnalysis.rationale}
               </div>

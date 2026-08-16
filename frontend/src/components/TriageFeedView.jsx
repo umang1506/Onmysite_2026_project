@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { AlertTriangle, Fingerprint, Activity, Mic, MessageSquare, Play, Pause, SkipBack, SkipForward, Download, Sliders, Video, ShieldCheck, CheckCircle2, Info, HelpCircle } from 'lucide-react';
+import { AlertTriangle, Fingerprint, Activity, Mic, MessageSquare, Play, Pause, SkipBack, SkipForward, Download, Sliders, Video, ShieldCheck, CheckCircle2, Info, HelpCircle, Pill, FileText } from 'lucide-react';
 import VideoPlaybackModal from './VideoPlaybackModal';
+import MedicationCheckerModal from './MedicationCheckerModal';
+import EmrReportExporterModal from './EmrReportExporterModal';
 
 export default function TriageFeedView({ sessions = [], activeSessionId = '#8842', currentUser }) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [streamTime, setStreamTime] = useState('T-00:00:00 Live');
   const [liveSpo2, setLiveSpo2] = useState(null);
   const [liveHr, setLiveHr] = useState(null);
+
   const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
+  const [isMedicationOpen, setIsMedicationOpen] = useState(false);
+  const [isEmrReportOpen, setIsEmrReportOpen] = useState(false);
 
   const currentSession = sessions.find((s) => s.sessionId === activeSessionId || s.id === activeSessionId) || sessions[0] || {
     sessionId: '#8842',
@@ -78,30 +83,44 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', height: '100%' }}>
-      {/* Session Title Bar & Intake State Machine Progress */}
+      {/* Session Title Bar & Intake State Progress */}
       <div className="session-header" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.75rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div className="session-title">
             Active Triage Session: <span className="session-tag">{currentSession.sessionId}</span>
           </div>
 
-          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <button
+              className="btn-ctrl"
+              onClick={() => setIsMedicationOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: '#9333ea', color: '#ffffff', borderColor: '#9333ea', fontWeight: 600, fontSize: '0.75rem' }}
+            >
+              <Pill size={13} /> Med Checker
+            </button>
+            <button
+              className="btn-ctrl"
+              onClick={() => setIsEmrReportOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: '#16a34a', color: '#ffffff', borderColor: '#16a34a', fontWeight: 600, fontSize: '0.75rem' }}
+            >
+              <FileText size={13} /> Export EMR Sheet
+            </button>
             <button
               className="btn-ctrl"
               onClick={() => setIsVideoModalOpen(true)}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#1e40af', color: '#ffffff', borderColor: '#1e40af', fontWeight: 600 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: '#1e40af', color: '#ffffff', borderColor: '#1e40af', fontWeight: 600, fontSize: '0.75rem' }}
             >
-              <Video size={14} /> 🎥 Watch Recorded Video
+              <Video size={13} /> Watch Video
             </button>
             <button
               className="btn-ctrl"
               onClick={handleExportAuditReport}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#0284c7', color: '#ffffff', borderColor: '#0284c7', fontWeight: 600 }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: '#0284c7', color: '#ffffff', borderColor: '#0284c7', fontWeight: 600, fontSize: '0.75rem' }}
             >
-              <Download size={14} /> Export Audit JSON
+              <Download size={13} /> Export JSON
             </button>
             <div className="live-badge">
-              <span className="live-dot"></span> LIVE STREAM ACTIVE
+              <span className="live-dot"></span> LIVE
             </div>
           </div>
         </div>
@@ -132,7 +151,7 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
         </div>
       </div>
 
-      {/* Automated Clarification Prompt Box (If Conflict Detected) */}
+      {/* Automated Clarification Prompt Box */}
       {currentSession.symptoms && (currentSession.symptoms.toLowerCase().includes('chest pain') || currentSession.symptoms.toLowerCase().includes('breathless')) && (
         <div style={{ background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: '10px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#1e40af', fontSize: '0.825rem' }}>
           <HelpCircle size={18} color="#0284c7" />
@@ -256,7 +275,6 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
               </div>
             </div>
 
-            {/* Keyword-Driven Triage Chart Tags */}
             <div style={{ marginBottom: '0.75rem' }}>
               <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
                 Keyword Triage Chart Compiler
@@ -306,7 +324,6 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
             </div>
           )}
 
-          {/* Final Hand-off Confirmation Card */}
           <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', padding: '0.75rem 0.9rem', borderRadius: '8px', fontSize: '0.8rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             <CheckCircle2 size={18} color="#16a34a" />
             <div>
@@ -353,10 +370,23 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
         </div>
       </div>
 
-      {/* Video Playback Modal */}
+      {/* Interactive Feature Modals */}
       <VideoPlaybackModal
         isOpen={isVideoModalOpen}
         onClose={() => setIsVideoModalOpen(false)}
+        session={currentSession}
+        currentUser={currentUser}
+      />
+
+      <MedicationCheckerModal
+        isOpen={isMedicationOpen}
+        onClose={() => setIsMedicationOpen(false)}
+        activeSession={currentSession}
+      />
+
+      <EmrReportExporterModal
+        isOpen={isEmrReportOpen}
+        onClose={() => setIsEmrReportOpen(false)}
         session={currentSession}
         currentUser={currentUser}
       />
