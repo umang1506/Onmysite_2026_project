@@ -83,6 +83,7 @@ body {
   justify-content: space-between;
   padding: 0 1.5rem;
   flex-shrink: 0;
+  transition: all 0.3s ease;
 }
 
 .content-body {
@@ -241,6 +242,67 @@ body {
   height: 32px;
   border-radius: 50%;
   object-fit: cover;
+}
+
+/* Dynamic Role Themes */
+.app-layout.theme-physician .header {
+  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
+  color: #ffffff;
+}
+.app-layout.theme-physician .header-title {
+  color: #ffffff;
+}
+.app-layout.theme-physician .header-tab {
+  color: #bfdbfe;
+}
+.app-layout.theme-physician .header-tab.active {
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+
+.app-layout.theme-nurse .header {
+  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+  color: #ffffff;
+}
+.app-layout.theme-nurse .header-title {
+  color: #ffffff;
+}
+.app-layout.theme-nurse .header-tab {
+  color: #e0f2fe;
+}
+.app-layout.theme-nurse .header-tab.active {
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+
+.app-layout.theme-psychiatrist .header {
+  background: linear-gradient(135deg, #6366f1 0%, #9333ea 100%);
+  color: #ffffff;
+}
+.app-layout.theme-psychiatrist .header-title {
+  color: #ffffff;
+}
+.app-layout.theme-psychiatrist .header-tab {
+  color: #faf5ff;
+}
+.app-layout.theme-psychiatrist .header-tab.active {
+  color: #ffffff;
+  border-bottom-color: #ffffff;
+}
+
+.app-layout.theme-admin .header {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #ffffff;
+}
+.app-layout.theme-admin .header-title {
+  color: #ffffff;
+}
+.app-layout.theme-admin .header-tab {
+  color: #cbd5e1;
+}
+.app-layout.theme-admin .header-tab.active {
+  color: #ffffff;
+  border-bottom-color: #38bdf8;
 }
 
 /* Page Components */

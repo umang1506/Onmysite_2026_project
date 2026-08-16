@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Activity, User, Key, ShieldCheck, ArrowRight, ChevronDown } from 'lucide-react';
+import { Activity, User, Key, ShieldCheck, ArrowRight, Lock, CheckCircle2 } from 'lucide-react';
 
 export default function LoginPage({ onLogin }) {
   const [selectedRole, setSelectedRole] = useState('physician');
@@ -16,7 +16,8 @@ export default function LoginPage({ onLogin }) {
       role: 'ED Physician (Triage Lead)',
       dept: 'Unit 7-B Emergency Center',
       avatar: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=120&auto=format&fit=crop&q=80',
-      description: 'Full clinical control: Overrides, Telehealth, Direct Admissions'
+      description: 'Full clinical control: Overrides, Telehealth, Direct Admissions',
+      themeColor: '#1e40af'
     },
     {
       id: 'nurse',
@@ -25,7 +26,8 @@ export default function LoginPage({ onLogin }) {
       role: 'Intake Nurse',
       dept: 'Multimodal Intake & Sensor Ingestion',
       avatar: 'https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=120&auto=format&fit=crop&q=80',
-      description: 'Patient intake: Launch + New Session, record vitals & symptoms'
+      description: 'Patient intake: Launch + New Session, record vitals & symptoms',
+      themeColor: '#0284c7'
     },
     {
       id: 'psychiatrist',
@@ -34,7 +36,8 @@ export default function LoginPage({ onLogin }) {
       role: 'Mental Health Specialist',
       dept: 'Psychiatric Crisis Triage Queue',
       avatar: 'https://images.unsplash.com/photo-1612349317150-e413f6a5b16d?w=120&auto=format&fit=crop&q=80',
-      description: 'Specialized queue: Mental health crisis evaluation & notes'
+      description: 'Specialized queue: Mental health crisis evaluation & notes',
+      themeColor: '#9333ea'
     },
     {
       id: 'admin',
@@ -43,7 +46,8 @@ export default function LoginPage({ onLogin }) {
       role: 'System Administrator',
       dept: 'Clinical Gateway IT Governance',
       avatar: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=120&auto=format&fit=crop&q=80',
-      description: 'IT Governance: System Health, Engine Thresholds, Replays'
+      description: 'IT Governance: System Health, Engine Thresholds, Replays',
+      themeColor: '#0f172a'
     }
   ];
 
@@ -69,7 +73,7 @@ export default function LoginPage({ onLogin }) {
       setError('');
       onLogin(matched);
     } else {
-      setError('Invalid Role ID or Password for the selected role. Please check credentials and try again.');
+      setError('Invalid Role ID or Password. Please check credentials below.');
     }
   };
 
@@ -77,85 +81,139 @@ export default function LoginPage({ onLogin }) {
     <div style={{
       minHeight: '100vh',
       width: '100vw',
-      background: 'linear-gradient(135deg, #0b0f19 0%, #1e1b4b 50%, #0f172a 100%)',
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '2rem'
+      overflow: 'hidden',
+      fontFamily: "'Inter', sans-serif"
     }}>
+      {/* Left Medical Hero Panel (Matching Screenshot) */}
       <div style={{
-        maxWidth: '850px',
-        width: '100%',
-        display: 'grid',
-        gridTemplateColumns: '1.1fr 1fr',
-        gap: '2rem',
-        background: 'rgba(18, 24, 38, 0.8)',
-        backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255, 255, 255, 0.1)',
-        borderRadius: '24px',
-        padding: '2.5rem',
-        boxShadow: '0 25px 60px rgba(0,0,0,0.5)'
+        flex: 1.2,
+        position: 'relative',
+        backgroundImage: 'linear-gradient(rgba(15, 23, 42, 0.75), rgba(15, 23, 42, 0.85)), url(https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=1600&auto=format&fit=crop&q=80)',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '3.5rem',
+        color: '#ffffff'
       }}>
-        {/* Left Form Panel */}
-        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-            <div style={{ width: 42, height: 42, background: '#0284c7', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#ffffff' }}>
-              <Activity size={24} />
-            </div>
-            <div>
-              <h1 style={{ fontSize: '1.3rem', fontWeight: 800, color: '#ffffff', lineHeight: '1.2' }}>
-                Clinical Intelligence Gateway
-              </h1>
-              <span style={{ fontSize: '0.75rem', color: '#a5b4fc', fontWeight: 600 }}>
-                Role-Based Authentication Login
-              </span>
-            </div>
+        {/* Brand Top Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <div style={{ background: '#2563eb', padding: '0.4rem 0.6rem', borderRadius: '8px', fontWeight: 800, fontSize: '1rem', letterSpacing: '0.05em' }}>
+            Onmysite
           </div>
+          <span style={{ fontSize: '0.85rem', fontWeight: 700, padding: '0.2rem 0.5rem', background: 'rgba(255,255,255,0.15)', borderRadius: '4px' }}>
+            DOC
+          </span>
+        </div>
 
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* 1. Role Selection Dropdown */}
+        {/* Hero Headline Text */}
+        <div style={{ maxWidth: '560px' }}>
+          <div style={{ fontSize: '0.85rem', fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#60a5fa', marginBottom: '1rem' }}>
+            INSPIRING BETTER HEALTH
+          </div>
+          <h1 style={{ fontSize: '3.2rem', fontWeight: 800, lineHeight: 1.15, marginBottom: '1.5rem', letterSpacing: '-0.02em' }}>
+            Upgrade your <span style={{ color: '#60a5fa', background: 'linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>healthcare</span> experience
+          </h1>
+          <p style={{ fontSize: '1.05rem', color: '#cbd5e1', lineHeight: 1.6, marginBottom: '2rem', fontWeight: 400 }}>
+            Get real-time deterministic triage, multimodal stream reconciliation, and automated clinical risk scoring whenever you need them.
+          </p>
+
+          <button
+            onClick={() => handleRoleSelectChange({ target: { value: 'physician' } })}
+            style={{
+              background: '#2563eb',
+              color: '#ffffff',
+              border: 'none',
+              padding: '0.85rem 1.8rem',
+              borderRadius: '9999px',
+              fontWeight: 700,
+              fontSize: '0.875rem',
+              letterSpacing: '0.05em',
+              cursor: 'pointer',
+              boxShadow: '0 10px 20px rgba(37, 99, 235, 0.3)',
+              textTransform: 'uppercase'
+            }}
+          >
+            Get Started
+          </button>
+        </div>
+
+        {/* Hero Footer Disclaimer */}
+        <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>
+          Deterministic Clinical Triage Gateway • HIPAA Level 5 Compliant Architecture
+        </div>
+      </div>
+
+      {/* Right Royal Blue Sign-In Panel (Matching Screenshot) */}
+      <div style={{
+        width: '460px',
+        background: 'linear-gradient(180deg, #1e40af 0%, #1d4ed8 100%)',
+        color: '#ffffff',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '3.5rem 3rem',
+        boxShadow: '-10px 0 30px rgba(0,0,0,0.2)',
+        zIndex: 10
+      }}>
+        <div>
+          <h2 style={{ fontSize: '1.6rem', fontWeight: 700, marginBottom: '2rem', color: '#ffffff' }}>
+            Sign in to your account
+          </h2>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+            {/* Role Select Dropdown */}
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#a5b4fc', display: 'block', marginBottom: '0.35rem' }}>
-                Select User Role
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#93c5fd', display: 'block', marginBottom: '0.4rem' }}>
+                Select Role
               </label>
               <div style={{ position: 'relative' }}>
-                <ShieldCheck size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#0284c7' }} />
+                <ShieldCheck size={18} style={{ position: 'absolute', left: 14, top: 12, color: '#93c5fd' }} />
                 <select
-                  className="search-input"
                   style={{
                     width: '100%',
-                    paddingLeft: '2.4rem',
-                    background: 'rgba(15, 23, 42, 0.9)',
+                    padding: '0.75rem 0.85rem 0.75rem 2.6rem',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    borderRadius: '8px',
                     color: '#ffffff',
-                    borderColor: '#0284c7',
+                    fontSize: '0.9rem',
                     fontWeight: 600,
-                    appearance: 'none',
-                    height: '42px'
+                    outline: 'none'
                   }}
                   value={selectedRole}
                   onChange={handleRoleSelectChange}
                 >
-                  <option value="physician">🩺 ED Physician (Triage Lead)</option>
-                  <option value="nurse">👩‍⚕️ Intake Nurse (Patient Ingestion)</option>
-                  <option value="psychiatrist">🧠 Mental Health Specialist</option>
-                  <option value="admin">⚙️ System Administrator (IT Ops)</option>
+                  <option value="physician" style={{ background: '#1e40af', color: '#fff' }}>🩺 ED Physician (Triage Lead)</option>
+                  <option value="nurse" style={{ background: '#1e40af', color: '#fff' }}>👩‍⚕️ Intake Nurse (Patient Ingestion)</option>
+                  <option value="psychiatrist" style={{ background: '#1e40af', color: '#fff' }}>🧠 Mental Health Specialist</option>
+                  <option value="admin" style={{ background: '#1e40af', color: '#fff' }}>⚙️ System Administrator (IT Ops)</option>
                 </select>
-                <ChevronDown size={16} style={{ position: 'absolute', right: 12, top: 13, color: '#94a3b8', pointerEvents: 'none' }} />
               </div>
             </div>
 
-            {/* 2. User / Role ID Input */}
+            {/* Role ID Input */}
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', display: 'block', marginBottom: '0.35rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#93c5fd', display: 'block', marginBottom: '0.4rem' }}>
                 User / Role ID
               </label>
               <div style={{ position: 'relative' }}>
-                <User size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#64748b' }} />
+                <User size={18} style={{ position: 'absolute', left: 14, top: 12, color: '#93c5fd' }} />
                 <input
                   type="text"
-                  className="search-input"
-                  style={{ width: '100%', paddingLeft: '2.4rem', background: 'rgba(0,0,0,0.4)', color: '#ffffff', borderColor: 'rgba(255,255,255,0.15)', height: '42px' }}
-                  placeholder="Enter User ID"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 0.85rem 0.75rem 2.6rem',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    fontSize: '0.9rem',
+                    outline: 'none'
+                  }}
+                  placeholder="e.g. physician, nurse, admin"
                   value={roleId}
                   onChange={(e) => setRoleId(e.target.value)}
                   required
@@ -163,18 +221,26 @@ export default function LoginPage({ onLogin }) {
               </div>
             </div>
 
-            {/* 3. Password Input */}
+            {/* Password Input */}
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#94a3b8', display: 'block', marginBottom: '0.35rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#93c5fd', display: 'block', marginBottom: '0.4rem' }}>
                 Password
               </label>
               <div style={{ position: 'relative' }}>
-                <Key size={16} style={{ position: 'absolute', left: 12, top: 12, color: '#64748b' }} />
+                <Lock size={18} style={{ position: 'absolute', left: 14, top: 12, color: '#93c5fd' }} />
                 <input
                   type="password"
-                  className="search-input"
-                  style={{ width: '100%', paddingLeft: '2.4rem', background: 'rgba(0,0,0,0.4)', color: '#ffffff', borderColor: 'rgba(255,255,255,0.15)', height: '42px' }}
-                  placeholder="Enter Password"
+                  style={{
+                    width: '100%',
+                    padding: '0.75rem 0.85rem 0.75rem 2.6rem',
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    border: '1px solid rgba(255, 255, 255, 0.25)',
+                    borderRadius: '8px',
+                    color: '#ffffff',
+                    fontSize: '0.9rem',
+                    outline: 'none'
+                  }}
+                  placeholder="••••••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
@@ -182,62 +248,91 @@ export default function LoginPage({ onLogin }) {
               </div>
             </div>
 
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '-0.25rem' }}>
+              <span style={{ fontSize: '0.78rem', color: '#93c5fd', cursor: 'pointer', textDecoration: 'underline' }}>
+                Forgot password?
+              </span>
+            </div>
+
             {error && (
-              <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', padding: '0.65rem', borderRadius: '8px', color: '#fca5a5', fontSize: '0.8rem' }}>
+              <div style={{ background: 'rgba(239, 68, 68, 0.25)', border: '1px solid rgba(239, 68, 68, 0.5)', padding: '0.65rem', borderRadius: '8px', color: '#ffffff', fontSize: '0.8rem' }}>
                 {error}
               </div>
             )}
 
-            <button type="submit" className="btn-primary" style={{ marginTop: '0.5rem', justifyContent: 'center', padding: '0.85rem', height: '44px' }}>
-              Sign In to Gateway <ArrowRight size={18} />
-            </button>
-          </form>
-        </div>
-
-        {/* Right Reference Table for Demo Accounts */}
-        <div style={{ borderLeft: '1px solid rgba(255, 255, 255, 0.08)', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-          <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#a5b4fc', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            📋 Clinical Role Profiles
-          </div>
-          <p style={{ fontSize: '0.75rem', color: '#94a3b8', margin: 0 }}>
-            Select a role profile below to auto-fill credentials:
-          </p>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
-            {demoAccounts.map((acc) => (
-              <div
-                key={acc.id}
-                onClick={() => {
-                  setSelectedRole(acc.id);
-                  setRoleId(acc.id);
-                  setPassword(acc.pass);
-                  setError('');
-                }}
+            {/* White Pill Sign In Button (Matching Screenshot) */}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.5rem' }}>
+              <button
+                type="submit"
                 style={{
-                  background: selectedRole === acc.id ? 'rgba(2, 132, 199, 0.2)' : 'rgba(255, 255, 255, 0.03)',
-                  border: `1px solid ${selectedRole === acc.id ? '#0284c7' : 'rgba(255, 255, 255, 0.08)'}`,
-                  borderRadius: '10px',
-                  padding: '0.75rem',
+                  background: '#ffffff',
+                  color: '#1d4ed8',
+                  border: 'none',
+                  padding: '0.75rem 2rem',
+                  borderRadius: '9999px',
+                  fontWeight: 700,
+                  fontSize: '0.9rem',
                   cursor: 'pointer',
-                  transition: 'all 0.2s ease',
+                  boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '0.75rem'
+                  gap: '0.5rem'
                 }}
               >
-                <img
-                  src={acc.avatar}
-                  alt={acc.name}
-                  style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '1px solid rgba(255,255,255,0.2)' }}
-                />
-                <div style={{ flex: 1, fontSize: '0.75rem' }}>
-                  <div style={{ fontWeight: 700, color: '#ffffff', fontSize: '0.85rem' }}>{acc.name}</div>
-                  <div style={{ color: '#0284c7', fontWeight: 600 }}>{acc.role}</div>
-                  <div style={{ color: '#94a3b8', fontSize: '0.7rem', marginTop: '0.15rem' }}>{acc.dept}</div>
-                </div>
-              </div>
-            ))}
+                Sign In <ArrowRight size={16} />
+              </button>
+            </div>
+          </form>
+
+          {/* Clinical Role Profiles Quick Selector */}
+          <div style={{ marginTop: '2rem', borderTop: '1px solid rgba(255,255,255,0.15)', paddingTop: '1.25rem' }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#93c5fd', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.65rem' }}>
+              Clinical Role Profiles
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {demoAccounts.map((acc) => {
+                const isSelected = selectedRole === acc.id;
+                return (
+                  <div
+                    key={acc.id}
+                    onClick={() => {
+                      setSelectedRole(acc.id);
+                      setRoleId(acc.id);
+                      setPassword(acc.pass);
+                      setError('');
+                    }}
+                    style={{
+                      background: isSelected ? 'rgba(255, 255, 255, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                      border: `1px solid ${isSelected ? '#ffffff' : 'rgba(255, 255, 255, 0.15)'}`,
+                      borderRadius: '8px',
+                      padding: '0.5rem 0.75rem',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '0.65rem',
+                      transition: 'all 0.15s ease'
+                    }}
+                  >
+                    <img
+                      src={acc.avatar}
+                      alt={acc.name}
+                      style={{ width: 32, height: 32, borderRadius: '50%', objectFit: 'cover' }}
+                    />
+                    <div style={{ flex: 1, fontSize: '0.75rem' }}>
+                      <div style={{ fontWeight: 700, color: '#ffffff' }}>{acc.name}</div>
+                      <div style={{ color: '#93c5fd', fontSize: '0.7rem' }}>{acc.role}</div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
+        </div>
+
+        {/* Footer Note */}
+        <div style={{ fontSize: '0.7rem', color: '#93c5fd', textAlign: 'center', marginTop: '1.5rem' }}>
+          By logging in you agree to our <u>Terms of Services</u> and <u>Privacy Policy</u>.
         </div>
       </div>
     </div>

@@ -9,6 +9,7 @@ import SystemHealthView from './components/SystemHealthView';
 import DirectAdmissionsView from './components/DirectAdmissionsView';
 import StaffingView from './components/StaffingView';
 import LoginPage from './components/LoginPage';
+import ClinicalChatbot from './components/ClinicalChatbot';
 
 import NewSessionModal from './components/NewSessionModal';
 import SettingsModal from './components/SettingsModal';
@@ -262,7 +263,7 @@ export default function App() {
   const userRole = currentUser?.id || 'physician';
 
   return (
-    <div className="app-layout">
+    <div className={`app-layout theme-${userRole}`}>
       {/* Left Sidebar */}
       <Sidebar
         activeNav={activeNav}
@@ -338,6 +339,9 @@ export default function App() {
           )}
         </main>
       </div>
+
+      {/* Floating Clinical AI Chatbot */}
+      <ClinicalChatbot onNewSessionCreated={handleNewSessionCreated} />
 
       {/* Modals, Drawers & Interactive Popups */}
       <NewSessionModal

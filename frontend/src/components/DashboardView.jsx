@@ -109,7 +109,7 @@ export default function DashboardView({ currentUser, onNavigate }) {
           </div>
           <div className="card-panel" style={{ borderLeft: '4px solid #a855f7' }}>
             <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#9333ea', textTransform: 'uppercase' }}>Deterministic Replays</div>
-            <div style={{ fontSize: '1.8rem', fontWeight 800, color: '#0f172a', margin: '0.25rem 0' }}>100%</div>
+            <div style={{ fontSize: '1.8rem', fontWeight: 800, color: '#0f172a', margin: '0.25rem 0' }}>100%</div>
             <div style={{ fontSize: '0.75rem', color: '#64748b' }}>All 7 fixtures passed</div>
           </div>
           <div className="card-panel" style={{ borderLeft: '4px solid #6366f1' }}>
