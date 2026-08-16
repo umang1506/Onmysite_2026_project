@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Play } from 'lucide-react';
+import { X, Play, Mic, MicOff, Sparkles } from 'lucide-react';
 import { sendEvent, fetchTriage } from '../api/client';
 
 export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
@@ -10,8 +10,19 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
   const [hr, setHr] = useState('112');
   const [source, setSource] = useState('audio');
   const [loading, setLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleSimulatedVoiceRecord = () => {
+    setIsRecording(true);
+    setSymptoms('Listening to voice audio intake...');
+    setTimeout(() => {
+      setIsRecording(false);
+      setSymptoms('Patient audio transcript: "Patient states chest pain began abruptly 20 minutes ago. Radiating to left arm with cold sweat."');
+      setSource('audio');
+    }, 1800);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -88,7 +99,7 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
       <div style={{
         background: '#ffffff',
         borderRadius: '12px',
-        width: '480px',
+        width: '500px',
         padding: '1.5rem',
         boxShadow: '0 20px 40px rgba(0,0,0,0.2)',
         border: '1px solid #e2e8f0'
@@ -138,10 +149,21 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
           </div>
 
           <div>
-            <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b', display: 'block', marginBottom: '0.3rem' }}>Symptom Description</label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: 600, color: '#64748b' }}>Symptom Description</label>
+              <button
+                type="button"
+                className="btn-ctrl"
+                onClick={handleSimulatedVoiceRecord}
+                style={{ background: isRecording ? '#fef2f2' : '#e0f2fe', color: isRecording ? '#dc2626' : '#0284c7', border: '1px solid #bae6fd', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+              >
+                {isRecording ? <MicOff size={14} className="spin" /> : <Mic size={14} />}
+                {isRecording ? 'Listening...' : '🎙️ Record Voice Audio'}
+              </button>
+            </div>
             <textarea
               className="search-input"
-              style={{ width: '100%', height: '70px', resize: 'none' }}
+              style={{ width: '100%', height: '75px', resize: 'none' }}
               placeholder="Patient states chest pain began abruptly 20 minutes ago..."
               value={symptoms}
               onChange={(e) => setSymptoms(e.target.value)}

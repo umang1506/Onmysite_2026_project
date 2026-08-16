@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
-import { AlertTriangle, Fingerprint, Activity, Mic, MessageSquare, Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { AlertTriangle, Fingerprint, Activity, Mic, MessageSquare, Play, Pause, SkipBack, SkipForward, Download, Sliders } from 'lucide-react';
+import { sendEvent, fetchTriage } from '../api/client';
 
 export default function TriageFeedView({ sessions = [], activeSessionId = '#8842' }) {
   const [isPlaying, setIsPlaying] = useState(true);
   const [streamTime, setStreamTime] = useState('T-00:00:00 Live');
+  const [liveSpo2, setLiveSpo2] = useState(null);
+  const [liveHr, setLiveHr] = useState(null);
+  const [simulatedDecision, setSimulatedDecision] = useState(null);
 
   const currentSession = sessions.find((s) => s.sessionId === activeSessionId || s.id === activeSessionId) || sessions[0] || {
     sessionId: '#8842',
@@ -19,6 +23,65 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
     auditLogs: []
   };
 
+  const activeSpo2 = liveSpo2 !== null ? liveSpo2 : currentSession.spo2;
+  const activeHr = liveHr !== null ? liveHr : currentSession.hr;
+  const activeDecision = activeSpo2 < 90 || activeHr > 150 ? 'EMERGENCY' : (simulatedDecision || currentSession.decision);
+
+  // Play synthetic Web Audio alert beep when emergency is triggered
+  const playEmergencyTone = () => {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sawtooth';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // A5 note
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.3);
+    } catch (e) {
+      // Audio context fallback
+    }
+  };
+
+  const handleSpo2Change = (val) => {
+    setLiveSpo2(val);
+    if (val < 90) {
+      playEmergencyTone();
+    }
+  };
+
+  // Export Clinical Audit Report JSON
+  const handleExportAuditReport = () => {
+    const reportData = {
+      hospital: 'Onmysite Clinical Intelligence Gateway (Unit 7-B Center)',
+      exportedAt: new Date().toISOString(),
+      session: {
+        id: currentSession.sessionId,
+        patientName: currentSession.patientName,
+        dob: currentSession.dob,
+        matchScore: `${currentSession.matchScore}%`
+      },
+      currentVitals: {
+        spo2: `${activeSpo2}%`,
+        heartRate: `${activeHr} bpm`
+      },
+      triageDecision: activeDecision,
+      decisionReason: currentSession.decisionReason,
+      eventsStream: currentSession.events,
+      auditTrail: currentSession.auditLogs
+    };
+
+    const blob = new Blob([JSON.stringify(reportData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Audit_Report_${currentSession.sessionId.replace('#', '')}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', height: '100%' }}>
       {/* Session Title Bar */}
@@ -26,9 +89,57 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
         <div className="session-title">
           Active Triage Session: <span className="session-tag">{currentSession.sessionId}</span>
         </div>
-        <div className="live-badge">
-          <span className="live-dot"></span> LIVE STREAM ACTIVE
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+          <button
+            className="btn-ctrl"
+            onClick={handleExportAuditReport}
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#0284c7', color: '#ffffff', borderColor: '#0284c7', fontWeight: 600 }}
+          >
+            <Download size={14} /> Export Audit Report (JSON)
+          </button>
+          <div className="live-badge">
+            <span className="live-dot"></span> LIVE STREAM ACTIVE
+          </div>
         </div>
+      </div>
+
+      {/* Interactive IoT Vitals Simulator Bar */}
+      <div className="card-panel" style={{ background: '#f8fafc', border: '1px solid #0284c7', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontWeight: 700, fontSize: '0.85rem', color: '#0284c7' }}>
+          <Sliders size={16} /> Live IoT Vitals Stream Simulator:
+        </div>
+        <div style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: activeSpo2 < 90 ? '#dc2626' : '#0f172a' }}>
+              SpO₂ ({activeSpo2}%):
+            </span>
+            <input
+              type="range"
+              min="75"
+              max="100"
+              value={activeSpo2}
+              onChange={(e) => handleSpo2Change(Number(e.target.value))}
+              style={{ cursor: 'pointer', accentColor: activeSpo2 < 90 ? '#dc2626' : '#0284c7' }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: activeHr > 150 ? '#dc2626' : '#0f172a' }}>
+              Heart Rate ({activeHr} bpm):
+            </span>
+            <input
+              type="range"
+              min="50"
+              max="180"
+              value={activeHr}
+              onChange={(e) => setLiveHr(Number(e.target.value))}
+              style={{ cursor: 'pointer', accentColor: activeHr > 150 ? '#dc2626' : '#0284c7' }}
+            />
+          </div>
+        </div>
+        <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+          Drag sliders to test real-time emergency vitals override.
+        </span>
       </div>
 
       {/* 3-Column Layout */}
@@ -55,7 +166,7 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
 
                 {evt.source === 'sensor' ? (
                   <div style={{ fontSize: '0.85rem', fontWeight: 600 }}>
-                    HR: <span style={{ color: '#0f172a' }}>{evt.hr}</span> | SpO2: <span style={{ color: evt.spo2 < 90 ? '#dc2626' : '#10b981', fontWeight: 700 }}>{evt.spo2}%</span>
+                    HR: <span style={{ color: '#0f172a' }}>{activeHr}</span> | SpO2: <span style={{ color: activeSpo2 < 90 ? '#dc2626' : '#10b981', fontWeight: 700 }}>{activeSpo2}%</span>
                   </div>
                 ) : (
                   <div style={{ fontSize: '0.8rem', color: '#334155', lineHeight: '1.4' }}>
@@ -99,13 +210,13 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
             <div className="card-title">Current Patient State</div>
 
             <div className="vitals-row">
-              <div className={`vital-box ${currentSession.spo2 < 90 ? 'alert' : ''}`}>
+              <div className={`vital-box ${activeSpo2 < 90 ? 'alert' : ''}`}>
                 <div className="vital-label">Latest SpO2</div>
-                <div className="vital-value">{currentSession.spo2}%</div>
+                <div className="vital-value">{activeSpo2}%</div>
               </div>
               <div className="vital-box">
                 <div className="vital-label">Heart Rate</div>
-                <div className="vital-value">{currentSession.hr} <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>bpm</span></div>
+                <div className="vital-value">{activeHr} <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>bpm</span></div>
               </div>
             </div>
 
@@ -123,11 +234,11 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
         {/* Column 3: Decision Banner, Logic & Audit Trail */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {/* Large Emergency Banner */}
-          {currentSession.decision === 'EMERGENCY' ? (
+          {activeDecision === 'EMERGENCY' ? (
             <div className="banner-emergency">
               <AlertTriangle size={26} /> ▲ EMERGENCY
             </div>
-          ) : currentSession.decision === 'MENTAL HEALTH' ? (
+          ) : activeDecision === 'MENTAL HEALTH' ? (
             <div style={{ background: '#faf5ff', border: '2px solid #a855f7', color: '#9333ea', padding: '1rem', borderRadius: '8px', textAlign: 'center', fontSize: '1.3rem', fontWeight: 800 }}>
               💜 MENTAL HEALTH
             </div>
@@ -141,7 +252,9 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
           <div className="card-panel">
             <div className="card-title">Decision Logic</div>
             <div style={{ borderLeft: '4px solid #ef4444', paddingLeft: '0.75rem', fontSize: '0.825rem', color: '#334155', lineHeight: '1.4' }}>
-              {currentSession.decisionReason}
+              {activeSpo2 < 90
+                ? `Escalated to Emergency: SpO2 level (${activeSpo2}%) dropped below 90% threshold, overriding patient symptoms.`
+                : currentSession.decisionReason}
             </div>
           </div>
 
