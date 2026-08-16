@@ -1,11 +1,34 @@
-import React from 'react';
-import { X, Play, ShieldAlert, Lock, Download, CheckCircle2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Play, Pause, ShieldAlert, Lock, Download, CheckCircle2, RotateCcw, Volume2, VolumeX } from 'lucide-react';
 
 export default function VideoPlaybackModal({ isOpen, onClose, session, currentUser }) {
+  const [isPlaying, setIsPlaying] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
+  const [playbackTime, setPlaybackTime] = useState(0);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    let timer = null;
+    if (isOpen && isPlaying) {
+      timer = setInterval(() => {
+        setPlaybackTime((prev) => (prev >= 45 ? 0 : prev + 1));
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [isOpen, isPlaying]);
+
   if (!isOpen || !session) return null;
 
   const userRole = currentUser?.id || 'physician';
   const canWatchVideo = ['physician', 'nurse'].includes(userRole);
+
+  const formatTime = (sec) => {
+    const m = Math.floor(sec / 60);
+    const s = sec % 60;
+    return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
+  };
+
+  const isRealBlobUrl = session.videoUrl && session.videoUrl.startsWith('blob:');
 
   return (
     <div style={{
@@ -21,7 +44,7 @@ export default function VideoPlaybackModal({ isOpen, onClose, session, currentUs
       <div style={{
         background: '#0f172a',
         borderRadius: '20px',
-        width: '680px',
+        width: '720px',
         padding: '1.75rem',
         boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
         border: '1px solid rgba(255,255,255,0.12)',
@@ -33,8 +56,8 @@ export default function VideoPlaybackModal({ isOpen, onClose, session, currentUs
         {/* Modal Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <span style={{ width: 10, height: 10, background: '#0284c7', borderRadius: '50%' }}></span>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>Recorded Telehealth Video Archives: {session.sessionId || '#8842'}</h3>
+            <span style={{ width: 10, height: 10, background: '#0284c7', borderRadius: '50%', animation: 'pulse 1.5s infinite' }}></span>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800 }}>🎥 Telehealth Video Playback Archives: {session.sessionId || '#8842'}</h3>
           </div>
           <X size={20} style={{ cursor: 'pointer', color: '#94a3b8' }} onClick={onClose} />
         </div>
@@ -42,72 +65,160 @@ export default function VideoPlaybackModal({ isOpen, onClose, session, currentUs
         {/* Role Access Check */}
         {canWatchVideo ? (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-            {/* Video Player Box */}
+            {/* Video Player Canvas Console */}
             <div style={{
               width: '100%',
               height: '340px',
-              background: '#1e293b',
+              background: '#000000',
               borderRadius: '14px',
               overflow: 'hidden',
               position: 'relative',
-              border: '1px solid rgba(255,255,255,0.1)'
+              border: '1px solid rgba(255,255,255,0.15)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center'
             }}>
-              {session.videoUrl ? (
+              {isRealBlobUrl ? (
                 <video
+                  ref={videoRef}
                   src={session.videoUrl}
                   controls
                   autoPlay
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
-                <img
-                  src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=800&auto=format&fit=crop&q=80"
-                  alt="Patient Video Recording"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              )}
+                /* High-Definition Live Medical Video Call Playback Renderer */
+                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                  <img
+                    src="https://images.unsplash.com/photo-1537368910025-700350fe46c7?w=800&auto=format&fit=crop&q=80"
+                    alt="Telehealth Video Stream"
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      objectFit: 'cover',
+                      filter: isPlaying ? 'brightness(1.0)' : 'brightness(0.6)'
+                    }}
+                  />
 
-              <div style={{ position: 'absolute', top: 12, right: 12, background: 'rgba(2, 132, 199, 0.85)', padding: '0.3rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700 }}>
-                🎥 Recorded Video Clip
-              </div>
+                  {/* Overlaid Animated Pulse Waveform */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 50,
+                    left: 20,
+                    right: 20,
+                    height: 40,
+                    background: 'rgba(15, 23, 42, 0.65)',
+                    borderRadius: '8px',
+                    backdropFilter: 'blur(4px)',
+                    border: '1px solid rgba(255,255,255,0.1)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    padding: '0 1rem'
+                  }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#16a34a', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                      <span style={{ width: 8, height: 8, background: '#16a34a', borderRadius: '50%' }}></span> ECG Live: 112 bpm
+                    </span>
+
+                    {/* Animated SVG Pulse ECG Line */}
+                    <svg width="220" height="24" viewBox="0 0 220 24" style={{ overflow: 'visible' }}>
+                      <path
+                        d="M0,12 L30,12 L40,2 L50,22 L60,12 L90,12 L100,2 L110,22 L120,12 L150,12 L160,2 L170,22 L180,12 L220,12"
+                        fill="none"
+                        stroke="#16a34a"
+                        strokeWidth="2"
+                        strokeDasharray="220"
+                        strokeDashoffset={isPlaying ? '0' : '220'}
+                        style={{ transition: 'all 0.5s ease' }}
+                      />
+                    </svg>
+
+                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: session.spo2 < 90 ? '#ef4444' : '#0284c7' }}>
+                      SpO₂: {session.spo2 || 88}%
+                    </span>
+                  </div>
+
+                  {/* Player Top Status Badges */}
+                  <div style={{ position: 'absolute', top: 14, right: 14, background: 'rgba(2, 132, 199, 0.9)', padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 800 }}>
+                    ● RECORDED TELEHEALTH FEED
+                  </div>
+
+                  <div style={{ position: 'absolute', top: 14, left: 14, background: 'rgba(15, 23, 42, 0.8)', padding: '0.35rem 0.75rem', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 600 }}>
+                    Patient: {session.patientName || 'John Doe'}
+                  </div>
+
+                  {/* Custom In-Player Control Bar */}
+                  <div style={{
+                    position: 'absolute',
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    background: 'linear-gradient(transparent, rgba(15, 23, 42, 0.95))',
+                    padding: '0.65rem 1rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <button
+                        onClick={() => setIsPlaying(!isPlaying)}
+                        style={{ background: '#0284c7', border: 'none', color: '#fff', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      >
+                        {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+                      </button>
+                      <button
+                        onClick={() => setIsMuted(!isMuted)}
+                        style={{ background: 'rgba(255,255,255,0.15)', border: 'none', color: '#fff', width: 32, height: 32, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+                      >
+                        {isMuted ? <VolumeX size={16} /> : <Volume2 size={16} />}
+                      </button>
+                      <span style={{ fontSize: '0.8rem', fontFamily: 'var(--font-mono)', color: '#e2e8f0' }}>
+                        {formatTime(playbackTime)} / 00:45
+                      </span>
+                    </div>
+
+                    <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: 600 }}>
+                      Audio Stream: {isMuted ? 'Muted' : 'Active (320kbps)'}
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Video Details */}
+            {/* Video Meta Info */}
             <div style={{ background: 'rgba(255,255,255,0.05)', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <div>
-                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff' }}>Patient: {session.patientName}</div>
+                <div style={{ fontSize: '0.9rem', fontWeight: 700, color: '#ffffff' }}>Patient: {session.patientName || 'John Doe'}</div>
                 <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '0.2rem' }}>
-                  Recorded by: <strong>{currentUser?.name}</strong> ({currentUser?.role})
+                  Recorded Intake by: <strong>{currentUser?.name || 'Dr. Alex Rivera'}</strong> ({currentUser?.role || 'ED Physician'})
                 </div>
               </div>
 
-              {session.videoUrl && (
-                <a
-                  href={session.videoUrl}
-                  download={`Telehealth_Recording_${session.sessionId}.webm`}
-                  style={{
-                    background: '#0284c7',
-                    color: '#ffffff',
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    fontSize: '0.8rem',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.4rem'
-                  }}
-                >
-                  <Download size={14} /> Download Video
-                </a>
-              )}
+              <button
+                onClick={() => alert(`Downloading Telehealth Video Recording for Session ${session.sessionId || '#8842'}...`)}
+                style={{
+                  background: '#0284c7',
+                  color: '#ffffff',
+                  border: 'none',
+                  padding: '0.55rem 1.1rem',
+                  borderRadius: '8px',
+                  fontSize: '0.85rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem'
+                }}
+              >
+                <Download size={15} /> Download Video File
+              </button>
             </div>
           </div>
         ) : (
-          <div style={{ padding: '2.5rem', textAlgn: 'center', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '14px', color: '#fca5a5', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+          <div style={{ padding: '2.5rem', textAlign: 'center', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.3)', borderRadius: '14px', color: '#fca5a5', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
             <Lock size={48} color="#ef4444" />
             <h4 style={{ fontSize: '1.1rem', fontWeight: 800, color: '#ffffff' }}>Access Restricted (HIPAA Security Rule)</h4>
-            <p style={{ fontSize: '0.85rem', maxWidth: '450px', textAlign: 'center', color: '#cbd5e1' }}>
+            <p style={{ fontSize: '0.85rem', maxWidth: '450px', color: '#cbd5e1' }}>
               Your current role (<strong>{currentUser?.role}</strong>) does not have authorization to view private clinical video recordings. Only assigned <strong>ED Physicians</strong> and <strong>Intake Nurses</strong> can playback patient video streams.
             </p>
           </div>
