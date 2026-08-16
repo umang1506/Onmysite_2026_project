@@ -1,0 +1,22 @@
+{
+  "name": "onmysite-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Deterministic Clinical Triage & Event Reconciliation System",
+  "scripts": {
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev": "npm --prefix backend run dev",
+    "test": "npm --prefix backend test",
+    "replay": "node backend/src/scripts/replayRunner.js"
+  },
+  "keywords": [
+    "clinical-triage",
+    "deterministic",
+    "reconciliation",
+    "express",
+    "react"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}

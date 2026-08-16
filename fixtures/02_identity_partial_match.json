@@ -1,0 +1,26 @@
+[
+  {
+    "event_id": "evt_02_a",
+    "source": "audio",
+    "timestamp": "2026-08-16T12:10:00.000Z",
+    "session_id": "sess_02_identity",
+    "data": {
+      "name": "Priya Verma",
+      "phone": "+91 99102 33445",
+      "symptoms": "Experiencing moderate dizziness upon standing up."
+    }
+  },
+  {
+    "event_id": "evt_02_b",
+    "source": "sensor",
+    "timestamp": "2026-08-16T12:12:00.000Z",
+    "session_id": "sess_02_identity",
+    "data": {
+      "name": "Priya Verma",
+      "phone": "9910233445",
+      "patient_id": "P-5421",
+      "heart_rate": 78,
+      "spo2": 97
+    }
+  }
+]

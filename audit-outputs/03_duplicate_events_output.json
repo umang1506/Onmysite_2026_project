@@ -1,0 +1,6 @@
+{
+  "decision": "General",
+  "explanation": "Assigned to General Triage: Patient reported symptoms (\"Feeling healthy, routine checkup confirm\") with vital signs in normal ranges (SpO2=98%, HR=84 bpm). No emergency or mental health flags detected.",
+  "patient_id": "P-7712",
+  "session_id": "sess_03_dup"
+}

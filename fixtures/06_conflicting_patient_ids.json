@@ -1,0 +1,26 @@
+[
+  {
+    "event_id": "evt_06_text",
+    "source": "text",
+    "timestamp": "2026-08-16T13:00:00.000Z",
+    "session_id": "sess_06_conflict_ids",
+    "data": {
+      "name": "Kavita Rao",
+      "phone": "+91-98200-11223",
+      "symptoms": "Experiencing mild throat irritation, confirm"
+    }
+  },
+  {
+    "event_id": "evt_06_sensor",
+    "source": "sensor",
+    "timestamp": "2026-08-16T13:02:00.000Z",
+    "session_id": "sess_06_conflict_ids",
+    "patient_id": "P-9008",
+    "data": {
+      "name": "Kavita Rao",
+      "phone": "9820011223",
+      "heart_rate": 76,
+      "spo2": 98
+    }
+  }
+]

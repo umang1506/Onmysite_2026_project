@@ -1,0 +1,18 @@
+[
+  {
+    "event_id": "evt-mh-001",
+    "source": "text",
+    "timestamp": "2026-08-16T16:20:00+05:30",
+    "data": { "text": "I don't want to live anymore, bahut akela mehsoos karta hoon", "name": "Arjun Mehta", "phone": "+91-9123456780" },
+    "patient_id": "PAT-IN-7700",
+    "session_id": "sess-arjun-005"
+  },
+  {
+    "event_id": "evt-mh-002",
+    "source": "sensor",
+    "timestamp": "2026-08-16T16:22:00+05:30",
+    "data": { "heart_rate": 72, "spo2": 98 },
+    "patient_id": "PAT-IN-7700",
+    "session_id": "sess-arjun-005"
+  }
+]

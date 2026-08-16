@@ -1,0 +1,26 @@
+[
+  {
+    "event_id": "evt-priya-001",
+    "source": "text",
+    "timestamp": "2026-08-16T09:58:00+05:30",
+    "data": { "text": "halka sar dard hai, koi tension nahi", "name": "Priya Sharma", "phone": "+91-9876543210" },
+    "patient_id": "PAT-IN-1001",
+    "session_id": "sess-priya-001"
+  },
+  {
+    "event_id": "evt-priya-002",
+    "source": "sensor",
+    "timestamp": "2026-08-16T09:59:00+05:30",
+    "data": { "heart_rate": 78, "spo2": 97 },
+    "patient_id": "PAT-IN-1001",
+    "session_id": "sess-priya-001"
+  },
+  {
+    "event_id": "evt-priya-003",
+    "source": "sensor",
+    "timestamp": "2026-08-16T10:05:00+05:30",
+    "data": { "heart_rate": 110, "spo2": 88 },
+    "patient_id": "PAT-IN-1001",
+    "session_id": "sess-priya-001"
+  }
+]

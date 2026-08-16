@@ -1,0 +1,34 @@
+[
+  {
+    "event_id": "evt_dup_999",
+    "source": "sensor",
+    "timestamp": "2026-08-16T12:20:00.000Z",
+    "session_id": "sess_03_dup",
+    "patient_id": "P-7712",
+    "data": {
+      "heart_rate": 84,
+      "spo2": 98
+    }
+  },
+  {
+    "event_id": "evt_dup_999",
+    "source": "sensor",
+    "timestamp": "2026-08-16T12:20:00.000Z",
+    "session_id": "sess_03_dup",
+    "patient_id": "P-7712",
+    "data": {
+      "heart_rate": 84,
+      "spo2": 98
+    }
+  },
+  {
+    "event_id": "evt_03_text",
+    "source": "text",
+    "timestamp": "2026-08-16T12:21:00.000Z",
+    "session_id": "sess_03_dup",
+    "patient_id": "P-7712",
+    "data": {
+      "symptoms": "Feeling healthy, routine checkup confirm"
+    }
+  }
+]

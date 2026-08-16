@@ -1,0 +1,25 @@
+[
+  {
+    "event_id": "evt_01_a",
+    "source": "text",
+    "timestamp": "2026-08-16T12:00:00.000Z",
+    "session_id": "sess_01_override",
+    "patient_id": "P-8841",
+    "data": {
+      "patient_name": "Rohan Sharma",
+      "phone": "+91-98765-43210",
+      "symptoms": "Patient reporting mild headache and slight nausea after lunch."
+    }
+  },
+  {
+    "event_id": "evt_01_b",
+    "source": "sensor",
+    "timestamp": "2026-08-16T12:04:15.000Z",
+    "session_id": "sess_01_override",
+    "patient_id": "P-8841",
+    "data": {
+      "heart_rate": 162,
+      "spo2": 86
+    }
+  }
+]

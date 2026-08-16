@@ -1,0 +1,10 @@
+[
+  {
+    "event_id": "evt-hang-001",
+    "source": "text",
+    "timestamp": "2026-08-16T07:00:00+05:30",
+    "data": { "text": "chakkar aa rahe hain, nausea bhi hai", "name": "Sunita Devi", "phone": "+91-9876512345" },
+    "patient_id": "PAT-IN-8800",
+    "session_id": "sess-sunita-006"
+  }
+]

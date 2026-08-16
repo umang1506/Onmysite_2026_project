@@ -1,0 +1,6 @@
+{
+  "decision": "Pending - Incomplete Data (Timeout)",
+  "explanation": "Session timed out after 5 minutes waiting for sensor telemetry. Text input recorded (\"Reporting persistent chest tightness and dizziness.\"), but required SpO2/HR vitals never arrived due to possible device disconnection.",
+  "patient_id": "P-1109",
+  "session_id": "sess_07_timeout"
+}

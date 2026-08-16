@@ -1,0 +1,6 @@
+{
+  "decision": "Mental Health",
+  "explanation": "Flagged for Mental Health Triage: Patient text indicated psychological distress keyword (\"panic attack\"). Vital signs remain within non-emergency baseline (SpO2=99, HR=88).",
+  "patient_id": "P-6620",
+  "session_id": "sess_05_mental"
+}

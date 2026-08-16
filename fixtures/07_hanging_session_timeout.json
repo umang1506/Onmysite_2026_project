@@ -1,0 +1,13 @@
+[
+  {
+    "event_id": "evt_07_text_only",
+    "source": "text",
+    "timestamp": "2026-08-16T11:00:00.000Z",
+    "session_id": "sess_07_timeout",
+    "patient_id": "P-1109",
+    "data": {
+      "patient_name": "Vikram Singh",
+      "symptoms": "Reporting persistent chest tightness and dizziness."
+    }
+  }
+]

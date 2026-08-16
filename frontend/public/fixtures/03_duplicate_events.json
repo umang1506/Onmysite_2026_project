@@ -1,0 +1,26 @@
+[
+  {
+    "event_id": "evt-kiosk-dup",
+    "source": "text",
+    "timestamp": "2026-08-16T14:00:00+05:30",
+    "data": { "text": "pet mein dard", "name": "Anita Verma", "phone": "+91-9988776655" },
+    "patient_id": "PAT-IN-3300",
+    "session_id": "sess-anita-003"
+  },
+  {
+    "event_id": "evt-kiosk-dup",
+    "source": "text",
+    "timestamp": "2026-08-16T14:00:05+05:30",
+    "data": { "text": "pet mein dard", "name": "Anita Verma", "phone": "+91-9988776655" },
+    "patient_id": "PAT-IN-3300",
+    "session_id": "sess-anita-003"
+  },
+  {
+    "event_id": "evt-anita-sensor",
+    "source": "sensor",
+    "timestamp": "2026-08-16T14:01:00+05:30",
+    "data": { "heart_rate": 76, "spo2": 98 },
+    "patient_id": "PAT-IN-3300",
+    "session_id": "sess-anita-003"
+  }
+]

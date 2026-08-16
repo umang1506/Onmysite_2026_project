@@ -1,0 +1,24 @@
+[
+  {
+    "event_id": "evt_05_audio",
+    "source": "audio",
+    "timestamp": "2026-08-16T12:45:00.000Z",
+    "session_id": "sess_05_mental",
+    "patient_id": "P-6620",
+    "data": {
+      "patient_name": "Aarav Patel",
+      "symptoms": "Feeling severe panic attack, overwhelming anxiety crisis, and helplessness."
+    }
+  },
+  {
+    "event_id": "evt_05_sensor",
+    "source": "sensor",
+    "timestamp": "2026-08-16T12:46:00.000Z",
+    "session_id": "sess_05_mental",
+    "patient_id": "P-6620",
+    "data": {
+      "heart_rate": 88,
+      "spo2": 99
+    }
+  }
+]

@@ -1,0 +1,33 @@
+[
+  {
+    "event_id": "evt_04_late_text",
+    "source": "text",
+    "timestamp": "2026-08-16T12:35:00.000Z",
+    "session_id": "sess_04_outoforder",
+    "patient_id": "P-3310",
+    "data": {
+      "symptoms": "Feeling completely recovered, no pain remaining."
+    }
+  },
+  {
+    "event_id": "evt_04_early_text",
+    "source": "text",
+    "timestamp": "2026-08-16T12:30:00.000Z",
+    "session_id": "sess_04_outoforder",
+    "patient_id": "P-3310",
+    "data": {
+      "symptoms": "Experiencing sharp chest pain and severe breathlessness."
+    }
+  },
+  {
+    "event_id": "evt_04_sensor",
+    "source": "sensor",
+    "timestamp": "2026-08-16T12:36:00.000Z",
+    "session_id": "sess_04_outoforder",
+    "patient_id": "P-3310",
+    "data": {
+      "heart_rate": 72,
+      "spo2": 98
+    }
+  }
+]

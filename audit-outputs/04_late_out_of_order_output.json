@@ -1,0 +1,6 @@
+{
+  "decision": "General",
+  "explanation": "Assigned to General Triage: Patient reported symptoms (\"Feeling completely recovered, no pain remaining.\") with vital signs in normal ranges (SpO2=98%, HR=72 bpm). No emergency or mental health flags detected.",
+  "patient_id": "P-3310",
+  "session_id": "sess_04_outoforder"
+}

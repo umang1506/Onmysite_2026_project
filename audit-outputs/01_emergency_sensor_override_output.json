@@ -1,0 +1,6 @@
+{
+  "decision": "Emergency",
+  "explanation": "Escalated to Emergency: Critical vitals recorded: SpO2=86% (threshold <90%), HR=162 bpm (threshold 40-150 bpm). Late sensor spike overridden stable patient text input (\"Patient reporting mild headache and slight nausea after lunch.\").",
+  "patient_id": "P-8841",
+  "session_id": "sess_01_override"
+}

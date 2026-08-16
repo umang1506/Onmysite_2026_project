@@ -1,0 +1,25 @@
+[
+  {
+    "event_id": "evt-ramesh-001",
+    "source": "text",
+    "timestamp": "2026-08-16T11:10:00+05:30",
+    "data": { "text": "bukhar hai 2 din se", "name": "Ramesh", "phone": "+91-8765432109" },
+    "session_id": "sess-ramesh-002"
+  },
+  {
+    "event_id": "evt-ramesh-002",
+    "source": "audio",
+    "timestamp": "2026-08-16T11:12:00+05:30",
+    "data": { "transcript": "Ramesh Kumar bol raha hoon, phone same hai", "phone": "8765432109" },
+    "patient_id": "PAT-IN-2045",
+    "session_id": "sess-ramesh-002"
+  },
+  {
+    "event_id": "evt-ramesh-003",
+    "source": "sensor",
+    "timestamp": "2026-08-16T11:15:00+05:30",
+    "data": { "heart_rate": 82, "spo2": 96 },
+    "patient_id": "PAT-IN-2045",
+    "session_id": "sess-ramesh-002"
+  }
+]
