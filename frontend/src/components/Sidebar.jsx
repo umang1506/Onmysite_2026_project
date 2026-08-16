@@ -1,7 +1,7 @@
 import React from 'react';
 import { LayoutDashboard, Radio, FolderHeart, Activity, Layers, Settings, HelpCircle, Plus } from 'lucide-react';
 
-export default function Sidebar({ activeNav, setActiveNav, onNewSession }) {
+export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenSettings, onOpenSupport }) {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { id: 'triage-feed', label: 'Triage Feed', icon: Radio },
@@ -44,11 +44,11 @@ export default function Sidebar({ activeNav, setActiveNav, onNewSession }) {
       </div>
 
       <div className="nav-section" style={{ borderTop: '1px solid var(--border-color)', paddingTop: '1rem' }}>
-        <div className="nav-item">
+        <div className="nav-item" onClick={onOpenSettings}>
           <Settings size={18} />
           <span>Settings</span>
         </div>
-        <div className="nav-item">
+        <div className="nav-item" onClick={onOpenSupport}>
           <HelpCircle size={18} />
           <span>Support</span>
         </div>

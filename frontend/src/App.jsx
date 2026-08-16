@@ -6,14 +6,31 @@ import SessionOverviewView from './components/SessionOverviewView';
 import DashboardView from './components/DashboardView';
 import PatientRecordsView from './components/PatientRecordsView';
 import SystemHealthView from './components/SystemHealthView';
+import DirectAdmissionsView from './components/DirectAdmissionsView';
+import StaffingView from './components/StaffingView';
+
 import NewSessionModal from './components/NewSessionModal';
+import SettingsModal from './components/SettingsModal';
+import SupportModal from './components/SupportModal';
+import NotificationDrawer from './components/NotificationDrawer';
+import NetworkStatusModal from './components/NetworkStatusModal';
+import TelehealthVideoModal from './components/TelehealthVideoModal';
+import UserProfileModal from './components/UserProfileModal';
 
 export default function App() {
   const [activeNav, setActiveNav] = useState('triage-feed');
   const [activeHeaderTab, setActiveHeaderTab] = useState('ED Queue');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSessionId, setSelectedSessionId] = useState('#8842');
-  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Modals & Drawers state
+  const [isNewSessionOpen, setIsNewSessionOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isSupportOpen, setIsSupportOpen] = useState(false);
+  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [isNetworkOpen, setIsNetworkOpen] = useState(false);
+  const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Initial Sessions State
   const [sessions, setSessions] = useState([
@@ -130,6 +147,7 @@ export default function App() {
 
   const handleSelectSession = (sessionId) => {
     setSelectedSessionId(sessionId);
+    setActiveHeaderTab('ED Queue');
     setActiveNav('triage-feed');
   };
 
@@ -207,12 +225,11 @@ export default function App() {
       status: dType === 'Emergency' ? 'Emergency Level 1' : dType === 'Mental Health' ? 'Mental Health' : 'General Level 4'
     };
 
-    // Prepend new session and patient record to global lists
     setSessions((prev) => [newSessionObj, ...prev]);
     setPatientRecords((prev) => [newRecordObj, ...prev]);
 
-    // Select the new session and switch to Triage Feed view
     setSelectedSessionId(`#${sessionId}`);
+    setActiveHeaderTab('ED Queue');
     setActiveNav('triage-feed');
   };
 
@@ -221,58 +238,111 @@ export default function App() {
       {/* Left Sidebar */}
       <Sidebar
         activeNav={activeNav}
-        setActiveNav={setActiveNav}
-        onNewSession={() => setIsModalOpen(true)}
+        setActiveNav={(nav) => {
+          setActiveNav(nav);
+          if (nav === 'triage-feed') setActiveHeaderTab('ED Queue');
+        }}
+        onNewSession={() => setIsNewSessionOpen(true)}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        onOpenSupport={() => setIsSupportOpen(false || true)}
       />
 
       {/* Main Content Area */}
       <div className="main-wrapper">
         <Header
           activeHeaderTab={activeHeaderTab}
-          setActiveHeaderTab={setActiveHeaderTab}
+          setActiveHeaderTab={(tab) => {
+            setActiveHeaderTab(tab);
+            if (tab === 'ED Queue' && activeNav !== 'triage-feed' && activeNav !== 'session-overview') {
+              setActiveNav('triage-feed');
+            }
+          }}
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
+          onToggleNotifications={() => setIsNotificationsOpen(!isNotificationsOpen)}
+          onOpenNetwork={() => setIsNetworkOpen(true)}
+          onOpenVideo={() => setIsVideoOpen(true)}
+          onOpenProfile={() => setIsProfileOpen(true)}
         />
 
         <main className="content-body">
-          {activeNav === 'dashboard' && (
-            <DashboardView onNavigate={(nav) => setActiveNav(nav)} />
-          )}
+          {/* Top Header Tab Switcher Override */}
+          {activeHeaderTab === 'Direct Admissions' ? (
+            <DirectAdmissionsView />
+          ) : activeHeaderTab === 'Staffing' ? (
+            <StaffingView />
+          ) : (
+            <>
+              {activeNav === 'dashboard' && (
+                <DashboardView onNavigate={(nav) => setActiveNav(nav)} />
+              )}
 
-          {activeNav === 'triage-feed' && (
-            <TriageFeedView
-              sessions={sessions}
-              activeSessionId={selectedSessionId}
-              onSelectSession={handleSelectSession}
-            />
-          )}
+              {activeNav === 'triage-feed' && (
+                <TriageFeedView
+                  sessions={sessions}
+                  activeSessionId={selectedSessionId}
+                  onSelectSession={handleSelectSession}
+                />
+              )}
 
-          {activeNav === 'session-overview' && (
-            <SessionOverviewView
-              sessions={sessions}
-              onSelectSession={handleSelectSession}
-              searchQuery={searchQuery}
-            />
-          )}
+              {activeNav === 'session-overview' && (
+                <SessionOverviewView
+                  sessions={sessions}
+                  onSelectSession={handleSelectSession}
+                  searchQuery={searchQuery}
+                />
+              )}
 
-          {activeNav === 'patient-records' && (
-            <PatientRecordsView
-              records={patientRecords}
-              searchQuery={searchQuery}
-            />
-          )}
+              {activeNav === 'patient-records' && (
+                <PatientRecordsView
+                  records={patientRecords}
+                  searchQuery={searchQuery}
+                />
+              )}
 
-          {activeNav === 'system-health' && (
-            <SystemHealthView />
+              {activeNav === 'system-health' && (
+                <SystemHealthView />
+              )}
+            </>
           )}
         </main>
       </div>
 
-      {/* Modal for launching + New Triage Session */}
+      {/* Modals, Drawers & Interactive Popups */}
       <NewSessionModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isNewSessionOpen}
+        onClose={() => setIsNewSessionOpen(false)}
         onSessionCreated={handleNewSessionCreated}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
+
+      <SupportModal
+        isOpen={isSupportOpen}
+        onClose={() => setIsSupportOpen(false)}
+      />
+
+      <NotificationDrawer
+        isOpen={isNotificationsOpen}
+        onClose={() => setIsNotificationsOpen(false)}
+      />
+
+      <NetworkStatusModal
+        isOpen={isNetworkOpen}
+        onClose={() => setIsNetworkOpen(false)}
+      />
+
+      <TelehealthVideoModal
+        isOpen={isVideoOpen}
+        onClose={() => setIsVideoOpen(false)}
+      />
+
+      <UserProfileModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
       />
     </div>
   );
