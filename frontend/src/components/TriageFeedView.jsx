@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertTriangle, Fingerprint, Activity, Mic, MessageSquare, Play, Pause, SkipBack, SkipForward, Download, Sliders, Video } from 'lucide-react';
+import { AlertTriangle, Fingerprint, Activity, Mic, MessageSquare, Play, Pause, SkipBack, SkipForward, Download, Sliders, Video, ShieldCheck, CheckCircle2, Info, HelpCircle } from 'lucide-react';
 import VideoPlaybackModal from './VideoPlaybackModal';
 
 export default function TriageFeedView({ sessions = [], activeSessionId = '#8842', currentUser }) {
@@ -26,6 +26,8 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
   const activeSpo2 = liveSpo2 !== null ? liveSpo2 : currentSession.spo2;
   const activeHr = liveHr !== null ? liveHr : currentSession.hr;
   const activeDecision = activeSpo2 < 90 || activeHr > 150 ? 'EMERGENCY' : currentSession.decision;
+
+  const intakeJourneyState = currentSession.intakeState || (activeDecision ? 'TRIAGE_COMPLETED' : 'AWAITING_VITALS');
 
   const playEmergencyTone = () => {
     try {
@@ -55,7 +57,8 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
         id: currentSession.sessionId,
         patientName: currentSession.patientName,
         dob: currentSession.dob,
-        matchScore: `${currentSession.matchScore}%`
+        matchScore: `${currentSession.matchScore}%`,
+        intakeJourneyState
       },
       currentVitals: { spo2: `${activeSpo2}%`, heartRate: `${activeHr} bpm` },
       triageDecision: activeDecision,
@@ -75,31 +78,69 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem', height: '100%' }}>
-      {/* Session Title Bar */}
-      <div className="session-header">
-        <div className="session-title">
-          Active Triage Session: <span className="session-tag">{currentSession.sessionId}</span>
+      {/* Session Title Bar & Intake State Machine Progress */}
+      <div className="session-header" style={{ flexDirection: 'column', alignItems: 'stretch', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="session-title">
+            Active Triage Session: <span className="session-tag">{currentSession.sessionId}</span>
+          </div>
+
+          <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
+            <button
+              className="btn-ctrl"
+              onClick={() => setIsVideoModalOpen(true)}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#1e40af', color: '#ffffff', borderColor: '#1e40af', fontWeight: 600 }}
+            >
+              <Video size={14} /> 🎥 Watch Recorded Video
+            </button>
+            <button
+              className="btn-ctrl"
+              onClick={handleExportAuditReport}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#0284c7', color: '#ffffff', borderColor: '#0284c7', fontWeight: 600 }}
+            >
+              <Download size={14} /> Export Audit JSON
+            </button>
+            <div className="live-badge">
+              <span className="live-dot"></span> LIVE STREAM ACTIVE
+            </div>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-          <button
-            className="btn-ctrl"
-            onClick={() => setIsVideoModalOpen(true)}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#1e40af', color: '#ffffff', borderColor: '#1e40af', fontWeight: 600 }}
-          >
-            <Video size={14} /> 🎥 Watch Recorded Video
-          </button>
-          <button
-            className="btn-ctrl"
-            onClick={handleExportAuditReport}
-            style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', background: '#0284c7', color: '#ffffff', borderColor: '#0284c7', fontWeight: 600 }}
-          >
-            <Download size={14} /> Export Audit JSON
-          </button>
-          <div className="live-badge">
-            <span className="live-dot"></span> LIVE STREAM ACTIVE
+
+        {/* Patient Intake Journey State Machine Bar */}
+        <div style={{ background: 'rgba(255,255,255,0.08)', padding: '0.5rem 0.85rem', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.75rem' }}>
+          <span style={{ fontWeight: 700, color: '#93c5fd' }}>📍 Intake State Journey:</span>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            {['GREETING', 'SYMPTOM_COLLECTION', 'AWAITING_VITALS', 'TRIAGE_READY', 'TRIAGE_COMPLETED'].map((step, idx) => {
+              const isCurrent = step === intakeJourneyState;
+              return (
+                <span
+                  key={step}
+                  style={{
+                    padding: '0.2rem 0.55rem',
+                    borderRadius: '12px',
+                    fontWeight: 700,
+                    background: isCurrent ? '#0284c7' : 'rgba(255,255,255,0.1)',
+                    color: isCurrent ? '#ffffff' : '#94a3b8',
+                    fontSize: '0.65rem'
+                  }}
+                >
+                  {idx + 1}. {step.replace('_', ' ')}
+                </span>
+              );
+            })}
           </div>
         </div>
       </div>
+
+      {/* Automated Clarification Prompt Box (If Conflict Detected) */}
+      {currentSession.symptoms && (currentSession.symptoms.toLowerCase().includes('chest pain') || currentSession.symptoms.toLowerCase().includes('breathless')) && (
+        <div style={{ background: '#eff6ff', border: '1px solid #93c5fd', borderRadius: '10px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.65rem', color: '#1e40af', fontSize: '0.825rem' }}>
+          <HelpCircle size={18} color="#0284c7" />
+          <div>
+            <strong>Automated Clarification Prompt:</strong> Patient reported critical chest symptoms alongside telemetry. System confirmed restriction parameters with ED Lead.
+          </div>
+        </div>
+      )}
 
       {/* Interactive IoT Vitals Simulator Bar */}
       <div className="card-panel" style={{ background: '#f8fafc', border: '1px solid #0284c7', padding: '0.85rem 1.25rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
@@ -203,7 +244,7 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
           </div>
 
           <div className="card-panel" style={{ flex: 1 }}>
-            <div className="card-title">Current Patient State</div>
+            <div className="card-title">Current Patient State & Keyword Chart</div>
             <div className="vitals-row">
               <div className={`vital-box ${activeSpo2 < 90 ? 'alert' : ''}`}>
                 <div className="vital-label">Latest SpO2</div>
@@ -212,6 +253,29 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
               <div className="vital-box">
                 <div className="vital-label">Heart Rate</div>
                 <div className="vital-value">{activeHr} <span style={{ fontSize: '0.8rem', fontWeight: 500 }}>bpm</span></div>
+              </div>
+            </div>
+
+            {/* Keyword-Driven Triage Chart Tags */}
+            <div style={{ marginBottom: '0.75rem' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
+                Keyword Triage Chart Compiler
+              </div>
+              <div style={{ display: 'flex', gap: '0.35rem', flexWrap: 'wrap' }}>
+                {activeSpo2 < 90 || (currentSession.symptoms && currentSession.symptoms.toLowerCase().includes('chest')) ? (
+                  <>
+                    <span style={{ padding: '0.2rem 0.5rem', background: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700 }}>
+                      🏷️ critical_respiratory
+                    </span>
+                    <span style={{ padding: '0.2rem 0.5rem', background: '#fff7ed', color: '#c2410c', border: '1px solid #ffedd5', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700 }}>
+                      🏷️ cardiac_distress
+                    </span>
+                  </>
+                ) : (
+                  <span style={{ padding: '0.2rem 0.5rem', background: '#f0fdf4', color: '#16a34a', border: '1px solid #bbf7d0', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 700 }}>
+                    🏷️ general_pain
+                  </span>
+                )}
               </div>
             </div>
 
@@ -226,7 +290,7 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
           </div>
         </div>
 
-        {/* Column 3: Decision Banner, Logic & Audit Trail */}
+        {/* Column 3: Decision Banner, Logic & Final Hand-off Confirmation */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
           {activeDecision === 'EMERGENCY' ? (
             <div className="banner-emergency">
@@ -241,6 +305,14 @@ export default function TriageFeedView({ sessions = [], activeSessionId = '#8842
               ✅ GENERAL TRIAGE
             </div>
           )}
+
+          {/* Final Hand-off Confirmation Card */}
+          <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', padding: '0.75rem 0.9rem', borderRadius: '8px', fontSize: '0.8rem', color: '#0f172a', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <CheckCircle2 size={18} color="#16a34a" />
+            <div>
+              <strong>Final Hand-off Confirmation:</strong> Triage priority logged with Unit 7-B Emergency medical staff.
+            </div>
+          </div>
 
           <div className="card-panel">
             <div className="card-title">Decision Logic</div>

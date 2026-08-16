@@ -1,6 +1,6 @@
 /**
  * In-memory Store for Patient Sessions.
- * Keeps track of session states, processed event IDs (for idempotency), and audit history.
+ * Keeps track of session states, processed event IDs, state machine transitions, and audit history.
  */
 
 class SessionStore {
@@ -12,6 +12,7 @@ class SessionStore {
     return {
       session_id: sessionId,
       patient_id: null,
+      intakeState: 'GREETING', // States: GREETING -> SYMPTOM_COLLECTION -> AWAITING_VITALS -> TRIAGE_READY -> TRIAGE_COMPLETED
       identity: {
         name: null,
         phone: null,
@@ -19,12 +20,18 @@ class SessionStore {
         resolved: false
       },
       latest_symptom: null,
+      normalized_symptom: null,
+      symptomChart: [],
       latest_telemetry: {
         heart_rate: null,
         spo2: null,
         timestamp: null
       },
       triageDecision: null,
+      holdingGateStatus: null,
+      fallbackPrompt: null,
+      clarificationPrompt: null,
+      handoffConfirmation: null,
       events: [],
       processedEventIds: new Set(),
       auditTrail: [],

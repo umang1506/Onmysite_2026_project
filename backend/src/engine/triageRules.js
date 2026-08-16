@@ -1,6 +1,6 @@
 /**
  * Triage Rules & Decision Gate Engine.
- * Evaluates Emergency, Mental Health, General, and Timeout states with dynamic interpolated explanations.
+ * Evaluates Emergency, Mental Health, General, Holding Gates, and Timeout states.
  */
 
 export function evaluateTriageRules(state, currentTime = new Date()) {
@@ -11,7 +11,7 @@ export function evaluateTriageRules(state, currentTime = new Date()) {
   const hasTextOrAudio = events.some(e => e.source === 'text' || e.source === 'audio');
   const hasSensor = events.some(e => e.source === 'sensor');
 
-  // Check explicit text confirmation keyword
+  // Explicit text confirmation phrase
   const hasExplicitConfirmation = symptomText.toLowerCase().includes('confirm') ||
     symptomText.toLowerCase().includes('verified') ||
     symptomText.toLowerCase().includes('confirmed');
@@ -27,23 +27,32 @@ export function evaluateTriageRules(state, currentTime = new Date()) {
 
   // 1. Hanging Session Timeout Edge Case
   if (!meetsDecisionGate && isTimedOut && hasTextOrAudio) {
+    state.holdingGateStatus = 'TIMED_OUT';
+    state.intakeState = 'AWAITING_VITALS';
     return {
       decision: 'Pending - Incomplete Data (Timeout)',
       explanation: `Session timed out after 5 minutes waiting for sensor telemetry. Text input recorded ("${symptomText}"), but required SpO2/HR vitals never arrived due to possible device disconnection.`,
       timestamp: new Date().toISOString(),
-      gateStatus: 'TIMED_OUT'
+      gateStatus: 'TIMED_OUT',
+      handoffConfirmation: 'Holding Gate Paused: Sensor vitals timed out.'
     };
   }
 
-  // 2. Gate blocked if incomplete data without timeout
+  // 2. Incomplete Data Holding Gate: Pause process if text submitted but sensor data missing
   if (!meetsDecisionGate) {
+    state.holdingGateStatus = 'PAUSED_AWAITING_VITALS';
+    state.intakeState = 'AWAITING_VITALS';
     return {
-      decision: 'Pending - Incomplete Data',
-      explanation: `Decision gate blocked: Requires ≥1 text/audio input AND (≥1 sensor telemetry OR explicit confirmation phrase). Currently recorded: text=${hasTextOrAudio ? 'yes' : 'no'}, sensor=${hasSensor ? 'yes' : 'no'}.`,
+      decision: 'Pending - Incomplete Data Holding Gate',
+      explanation: `Incomplete Data Holding Gate Active: Patient text symptoms recorded ("${symptomText || 'Ingested'}"), but sensor telemetry (SpO2/HR) has not arrived yet. Pausing triage evaluation.`,
       timestamp: new Date().toISOString(),
-      gateStatus: 'BLOCKED'
+      gateStatus: 'PAUSED',
+      handoffConfirmation: 'Holding Gate: Please attach sensor telemetry or confirm vitals to complete triage evaluation.'
     };
   }
+
+  state.holdingGateStatus = 'PASSED';
+  state.intakeState = 'TRIAGE_READY';
 
   // 3. Evaluate Emergency Rules (Sensor Vitals OR Emergency Keywords)
   const spo2 = telemetry.spo2;
@@ -80,11 +89,16 @@ export function evaluateTriageRules(state, currentTime = new Date()) {
       explanationParts.push(`Late sensor spike overridden stable patient text input ("${symptomText}")`);
     }
 
+    state.intakeState = 'TRIAGE_COMPLETED';
+    const handoff = `Final Hand-off Confirmation: Priority Level 1 [EMERGENCY] logged with Unit 7-B Emergency medical staff. Immediate physician assigned.`;
+    state.handoffConfirmation = handoff;
+
     return {
       decision: 'Emergency',
       explanation: `Escalated to Emergency: ${explanationParts.join('. ')}.`,
       timestamp: new Date().toISOString(),
-      gateStatus: 'PASSED'
+      gateStatus: 'PASSED',
+      handoffConfirmation: handoff
     };
   }
 
@@ -106,19 +120,29 @@ export function evaluateTriageRules(state, currentTime = new Date()) {
   }
 
   if (matchedMentalHealthKeyword) {
+    state.intakeState = 'TRIAGE_COMPLETED';
+    const handoff = `Final Hand-off Confirmation: Priority Level [MENTAL HEALTH CRISIS] logged with Psychiatric Intervention Lead.`;
+    state.handoffConfirmation = handoff;
+
     return {
       decision: 'Mental Health',
       explanation: `Flagged for Mental Health Triage: Patient text indicated psychological distress keyword ("${matchedMentalHealthKeyword}"). Vital signs remain within non-emergency baseline (SpO2=${spo2 ?? 'normal'}, HR=${hr ?? 'normal'}).`,
       timestamp: new Date().toISOString(),
-      gateStatus: 'PASSED'
+      gateStatus: 'PASSED',
+      handoffConfirmation: handoff
     };
   }
 
   // 5. General Triage (Default when no emergency or mental health indicators exist)
+  state.intakeState = 'TRIAGE_COMPLETED';
+  const handoff = `Final Hand-off Confirmation: Priority Level [GENERAL TRIAGE] logged with attending nursing team.`;
+  state.handoffConfirmation = handoff;
+
   return {
     decision: 'General',
     explanation: `Assigned to General Triage: Patient reported symptoms ("${symptomText || 'routine check'}") with vital signs in normal ranges (SpO2=${spo2 ?? 'N/A'}%, HR=${hr ?? 'N/A'} bpm). No emergency or mental health flags detected.`,
     timestamp: new Date().toISOString(),
-    gateStatus: 'PASSED'
+    gateStatus: 'PASSED',
+    handoffConfirmation: handoff
   };
 }
