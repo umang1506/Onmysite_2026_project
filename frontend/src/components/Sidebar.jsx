@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Radio, FolderHeart, Activity, Layers, Settings, HelpCircle, Plus } from 'lucide-react';
+import { LayoutDashboard, Radio, FolderHeart, Activity, Layers, Settings, HelpCircle, Plus, Activity as MedicalCross } from 'lucide-react';
 
 export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenSettings, onOpenSupport, currentUser }) {
   const allNavItems = [
@@ -20,16 +20,18 @@ export default function Sidebar({ activeNav, setActiveNav, onNewSession, onOpenS
     <aside className="sidebar">
       <div>
         <div className="app-brand">
-          <div className="brand-icon">🏥</div>
+          <div className="brand-icon" style={{ background: '#e0f2fe', color: '#0284c7', width: 38, height: 38, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <MedicalCross size={20} />
+          </div>
           <div>
-            <div className="brand-name">Triage Command</div>
-            <div className="brand-sub">{currentUser?.dept || 'Unit 7-B Center'}</div>
+            <div className="brand-name" style={{ fontWeight: 800, color: '#1e3a8a', fontSize: '1.05rem' }}>Triage Command</div>
+            <div className="brand-sub" style={{ fontSize: '0.7rem', color: '#64748b' }}>{currentUser?.dept || 'Unit 7-B Center'}</div>
           </div>
         </div>
 
         {canCreateSession ? (
-          <button className="btn-new-session" onClick={onNewSession}>
-            <Plus size={18} /> + New Triage Session
+          <button className="btn-new-session" onClick={onNewSession} style={{ background: '#0284c7', color: '#ffffff', fontWeight: 700, borderRadius: '8px', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', cursor: 'pointer', border: 'none', width: '100%', marginBottom: '1.25rem', boxShadow: '0 4px 10px rgba(2, 132, 199, 0.25)' }}>
+            <Plus size={18} /> New Triage Session
           </button>
         ) : (
           <div style={{ padding: '0.5rem 0.75rem', background: '#f1f5f9', borderRadius: '8px', fontSize: '0.75rem', color: '#64748b', marginBottom: '1.25rem', textAlign: 'center' }}>

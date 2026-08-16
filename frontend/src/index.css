@@ -3,13 +3,13 @@
 :root {
   --bg-app: #f4f6fa;
   --bg-sidebar: #ffffff;
-  --bg-header: #ffffff;
+  --bg-header: #1d4ed8;
   --bg-card: #ffffff;
   --border-color: #e2e8f0;
   --border-subtle: #f1f5f9;
   
-  --primary-blue: #0284c7;
-  --primary-dark: #0369a1;
+  --primary-blue: #1d4ed8;
+  --primary-dark: #1e40af;
   --brand-navy: #1e3a8a;
   --active-blue: #2563eb;
   
@@ -57,7 +57,7 @@ body {
 
 .sidebar {
   width: 240px;
-  background: var(--bg-sidebar);
+  background: #ffffff;
   border-right: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
@@ -76,14 +76,15 @@ body {
 
 .header {
   height: 60px;
-  background: var(--bg-header);
-  border-bottom: 1px solid var(--border-color);
+  background: #1d4ed8 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 1.5rem;
   flex-shrink: 0;
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(29, 78, 216, 0.2);
 }
 
 .content-body {
@@ -105,8 +106,8 @@ body {
 }
 
 .brand-icon {
-  width: 32px;
-  height: 32px;
+  width: 38px;
+  height: 38px;
   background: #e0f2fe;
   color: #0284c7;
   border-radius: 50%;
@@ -118,9 +119,9 @@ body {
 }
 
 .brand-name {
-  font-size: 1.1rem;
-  font-weight: 700;
-  color: var(--brand-navy);
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #1e3a8a;
   line-height: 1.2;
 }
 
@@ -143,16 +144,17 @@ body {
   border: none;
   padding: 0.75rem 1rem;
   border-radius: 8px;
-  font-weight: 600;
-  font-size: 0.9rem;
+  font-weight: 700;
+  font-size: 0.875rem;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   cursor: pointer;
   margin-bottom: 1.25rem;
-  box-shadow: 0 2px 4px rgba(2, 132, 199, 0.2);
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.25);
   transition: all 0.2s ease;
+  width: 100%;
 }
 
 .btn-new-session:hover {
@@ -195,15 +197,16 @@ body {
 
 .header-title {
   font-size: 1.2rem;
-  font-weight: 700;
-  color: var(--brand-navy);
-  margin-right: 1rem;
+  font-weight: 800;
+  color: #ffffff !important;
+  margin-right: 1.5rem;
+  letter-spacing: -0.01em;
 }
 
 .header-tab {
   font-size: 0.9rem;
-  font-weight: 500;
-  color: var(--text-muted);
+  font-weight: 600;
+  color: #bfdbfe !important;
   cursor: pointer;
   padding: 0.5rem 0;
   border-bottom: 2px solid transparent;
@@ -211,9 +214,9 @@ body {
 }
 
 .header-tab.active {
-  color: #0284c7;
-  font-weight: 600;
-  border-bottom-color: #0284c7;
+  color: #ffffff !important;
+  font-weight: 700;
+  border-bottom-color: #ffffff !important;
 }
 
 .header-right {
@@ -223,86 +226,25 @@ body {
 }
 
 .search-input {
-  background: #f1f5f9;
+  background: #ffffff;
   border: 1px solid #cbd5e1;
   padding: 0.45rem 0.85rem;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 0.85rem;
   width: 220px;
   outline: none;
+  color: #0f172a;
 }
 
 .search-input:focus {
   border-color: #0284c7;
-  background: #ffffff;
 }
 
 .avatar {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   object-fit: cover;
-}
-
-/* Dynamic Role Themes */
-.app-layout.theme-physician .header {
-  background: linear-gradient(135deg, #1e40af 0%, #1d4ed8 100%);
-  color: #ffffff;
-}
-.app-layout.theme-physician .header-title {
-  color: #ffffff;
-}
-.app-layout.theme-physician .header-tab {
-  color: #bfdbfe;
-}
-.app-layout.theme-physician .header-tab.active {
-  color: #ffffff;
-  border-bottom-color: #ffffff;
-}
-
-.app-layout.theme-nurse .header {
-  background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
-  color: #ffffff;
-}
-.app-layout.theme-nurse .header-title {
-  color: #ffffff;
-}
-.app-layout.theme-nurse .header-tab {
-  color: #e0f2fe;
-}
-.app-layout.theme-nurse .header-tab.active {
-  color: #ffffff;
-  border-bottom-color: #ffffff;
-}
-
-.app-layout.theme-psychiatrist .header {
-  background: linear-gradient(135deg, #6366f1 0%, #9333ea 100%);
-  color: #ffffff;
-}
-.app-layout.theme-psychiatrist .header-title {
-  color: #ffffff;
-}
-.app-layout.theme-psychiatrist .header-tab {
-  color: #faf5ff;
-}
-.app-layout.theme-psychiatrist .header-tab.active {
-  color: #ffffff;
-  border-bottom-color: #ffffff;
-}
-
-.app-layout.theme-admin .header {
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #ffffff;
-}
-.app-layout.theme-admin .header-title {
-  color: #ffffff;
-}
-.app-layout.theme-admin .header-tab {
-  color: #cbd5e1;
-}
-.app-layout.theme-admin .header-tab.active {
-  color: #ffffff;
-  border-bottom-color: #38bdf8;
 }
 
 /* Page Components */

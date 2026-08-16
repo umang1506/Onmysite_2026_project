@@ -12,7 +12,7 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
     {
       id: 1,
       sender: 'bot',
-      text: 'Hello! I am your Clinical AI Triage Assistant. You can describe patient symptoms, report sensor vitals, or ask about system triage rules.',
+      text: 'Hello! I am your Clinical AI Assistant. How can I help you today? You can describe patient symptoms, ask about triage rules, or test emergency vitals.',
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }
   ]);
@@ -37,39 +37,115 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
     setLoading(true);
 
     try {
-      const lowerText = text.toLowerCase();
+      const lowerText = text.toLowerCase().trim();
 
-      // Check if user is asking a Q&A / explanation question
-      if (lowerText.includes('explain') || lowerText.includes('how does') || lowerText.includes('rule') || lowerText.includes('identity')) {
-        let reply = '';
-        if (lowerText.includes('identity')) {
-          reply = 'IDENTITY RESOLUTION: Uses exact patient_id (+1.0), normalized phone (+0.4), Levenshtein name distance (+0.3), and symptom overlap (+0.2) to match patient profiles without non-deterministic ML.';
-        } else if (lowerText.includes('spo2') || lowerText.includes('sensor') || lowerText.includes('override')) {
-          reply = 'PRIORITY OVERRIDE RULE: Objective vitals (SpO2 < 90% or HR > 150 bpm) automatically override calm patient text reports, escalating status to Emergency immediately.';
-        } else {
-          reply = 'TRIAGE ENGINE RULES: Evaluates input events in 3 tiers: 1. Sensor Vitals Override (SpO2 < 90%), 2. Emergency/Mental Health Keywords, 3. General Triage default. Session timeouts trigger after 5 minutes of missing sensor data.';
+      // 1. Try Backend /chat API (Google Gemini API / Assistant route)
+      let chatReplyText = null;
+      try {
+        const chatRes = await fetch('http://localhost:3000/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text })
+        });
+        if (chatRes.ok) {
+          const chatData = await chatRes.json();
+          if (chatData.reply) {
+            chatReplyText = chatData.reply;
+          }
         }
+      } catch (e) {
+        // Fallback to local assistant engine if backend endpoint fails
+      }
 
-        setTimeout(() => {
-          setMessages((prev) => [
-            ...prev,
-            {
-              id: Date.now() + 1,
-              sender: 'bot',
-              text: reply,
-              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-            }
-          ]);
-          setLoading(false);
-        }, 600);
+      if (chatReplyText) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            sender: 'bot',
+            text: chatReplyText,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+        setLoading(false);
         return;
       }
 
-      // Live Triage Event Submission to Express Backend API!
+      // 2. Handle Greetings & Conversational Shorthand (`hii`, `hello`, `hi`, `tq`, `thx`, `thanks`, etc.)
+      const greetings = ['hii', 'hi', 'hello', 'hey', 'good morning', 'good afternoon', 'hi there', 'hello there'];
+      const thanksList = ['tq', 'thx', 'thanks', 'thank you', 'ty', 'appreciate it', 'ok', 'okay', 'cool'];
+      const casualChat = ['who are you', 'what can you do', 'how are you', 'help'];
+
+      if (greetings.some(g => lowerText === g || lowerText.startsWith(g + ' ') || lowerText.startsWith(g + '!'))) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 2,
+            sender: 'bot',
+            text: 'Hello! 👋 How can I assist you with clinical triage today?\n• Describe patient symptoms (e.g. "Chest pain and cold sweat")\n• Ask rule questions (e.g. "Explain identity matching")\n• Test emergency vitals override',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      if (thanksList.some(t => lowerText === t || lowerText.startsWith(t + ' '))) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 3,
+            sender: 'bot',
+            text: 'You are very welcome! 👋 Let me know if you need to evaluate patient symptoms or test emergency vitals.',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      if (casualChat.some(c => lowerText.includes(c))) {
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 4,
+            sender: 'bot',
+            text: 'I am your Clinical Intelligence AI Assistant! I process patient symptoms, evaluate SpO2 vital overrides (< 90%), and resolve patient identities.',
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      // 3. Handle System & Rule Explanation Questions
+      if (lowerText.includes('explain') || lowerText.includes('how does') || lowerText.includes('rule') || lowerText.includes('identity')) {
+        let reply = '';
+        if (lowerText.includes('identity')) {
+          reply = '🔑 IDENTITY RESOLUTION: Scoring engine calculates identity matches using patient_id (+1.0), phone normalization (+0.4), Levenshtein name distance (+0.3), and DOB overlap.';
+        } else if (lowerText.includes('spo2') || lowerText.includes('sensor') || lowerText.includes('override')) {
+          reply = '🚨 PRIORITY OVERRIDE RULE: Vitals telemetry (SpO2 < 90% or HR > 150 bpm) automatically overrides calm text/audio reports, escalating status to Emergency Level 1 instantly.';
+        } else {
+          reply = '📋 TRIAGE RULES: 3 Tiers:\n1. Sensor Vitals Override (SpO2 < 90%)\n2. Emergency & Mental Health Keyword Triggers\n3. General Triage default.';
+        }
+
+        setMessages((prev) => [
+          ...prev,
+          {
+            id: Date.now() + 5,
+            sender: 'bot',
+            text: reply,
+            time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+          }
+        ]);
+        setLoading(false);
+        return;
+      }
+
+      // 4. Handle Medical Symptom Intake & Patient Triage Submission to Backend Engine!
       const sessionId = `TRG-${Math.floor(100 + Math.random() * 900)}C`;
       const patientId = `P-${Math.floor(10000 + Math.random() * 90000)}`;
 
-      // Infer vitals from text or set test defaults
       let inferredSpo2 = 98;
       let inferredHr = 76;
 
@@ -81,7 +157,7 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
         inferredHr = 88;
       }
 
-      // 1. Send Text Event to Backend API
+      // Send Text Event
       await sendEvent({
         event_id: `EV-CHAT-${Date.now()}-A`,
         source: 'text',
@@ -95,7 +171,7 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
         }
       });
 
-      // 2. Send Sensor Event to Backend API
+      // Send Sensor Event
       await sendEvent({
         event_id: `EV-CHAT-${Date.now()}-B`,
         source: 'sensor',
@@ -108,18 +184,18 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
         }
       });
 
-      // 3. Trigger Triage Evaluation
+      // Fetch Triage Result
       const triageResult = await fetchTriage(sessionId);
 
       const decision = triageResult.decision || 'General';
       const explanation = triageResult.explanation || 'Evaluated by Onmysite Triage Engine.';
 
-      const botReplyText = `Intake Event Ingested! Triage Decision: [${decision.toUpperCase()}]. Explanation: ${explanation}`;
+      const botReplyText = `🏥 Medical Intake Processed!\n• Decision: [${decision.toUpperCase()}]\n• Explanation: ${explanation}`;
 
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now() + 2,
+          id: Date.now() + 6,
           sender: 'bot',
           text: botReplyText,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -127,7 +203,6 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
         }
       ]);
 
-      // Notify App to add session to live feed and patient records
       if (onNewSessionCreated) {
         onNewSessionCreated({
           sessionId,
@@ -147,7 +222,7 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
       setMessages((prev) => [
         ...prev,
         {
-          id: Date.now() + 3,
+          id: Date.now() + 7,
           sender: 'bot',
           text: `Engine Error: ${err.message}`,
           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
@@ -214,7 +289,7 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
               <Bot size={20} />
               <div>
                 <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>Clinical AI Assistant</div>
-                <div style={{ fontSize: '0.7rem', opacity: 0.85 }}>Connected to Deterministic Engine</div>
+                <div style={{ fontSize: '0.7rem', opacity: 0.85 }}>Connected to Gemini API & Triage Engine</div>
               </div>
             </div>
             <X size={18} style={{ cursor: 'pointer' }} onClick={() => setIsOpen(false)} />
@@ -241,6 +316,7 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
                     border: m.sender === 'user' ? 'none' : '1px solid #e2e8f0',
                     fontSize: '0.825rem',
                     lineHeight: '1.4',
+                    whiteSpace: 'pre-wrap',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
                   }}
                 >
@@ -251,7 +327,7 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
             ))}
             {loading && (
               <div style={{ color: '#0284c7', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}>
-                <Sparkles size={14} className="spin" /> Evaluating events in engine...
+                <Sparkles size={14} className="spin" /> Thinking...
               </div>
             )}
             <div ref={messagesEndRef} />
@@ -263,19 +339,19 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
               onClick={() => handleSendMessage('Patient states severe chest pain abruptly 20 mins ago')}
               style={{ padding: '0.25rem 0.6rem', borderRadius: '12px', background: '#fef2f2', color: '#dc2626', border: '1px solid #fca5a5', fontSize: '0.7rem', fontWeight: 600, whitespace: 'nowrap', cursor: 'pointer' }}
             >
-              🚨 Test Chest Pain (Emergency)
+              🚨 Patient Chest Pain
             </button>
             <button
               onClick={() => handleSendMessage('Patient having severe panic attack and anxiety')}
               style={{ padding: '0.25rem 0.6rem', borderRadius: '12px', background: '#faf5ff', color: '#9333ea', border: '1px solid #d8b4fe', fontSize: '0.7rem', fontWeight: 600, whitespace: 'nowrap', cursor: 'pointer' }}
             >
-              💜 Test Panic Attack
+              💜 Panic Attack
             </button>
             <button
               onClick={() => handleSendMessage('Explain how identity matching works')}
               style={{ padding: '0.25rem 0.6rem', borderRadius: '12px', background: '#e0f2fe', color: '#0284c7', border: '1px solid #bae6fd', fontSize: '0.7rem', fontWeight: 600, whitespace: 'nowrap', cursor: 'pointer' }}
             >
-              ❓ Explain Identity Matching
+              ❓ Explain Rules
             </button>
           </div>
 
@@ -288,7 +364,7 @@ export default function ClinicalChatbot({ onNewSessionCreated }) {
               type="text"
               className="search-input"
               style={{ flex: 1, height: '38px' }}
-              placeholder="Describe symptoms or ask a rule question..."
+              placeholder="Ask Gemini AI or type patient symptoms..."
               value={inputMsg}
               onChange={(e) => setInputMsg(e.target.value)}
             />

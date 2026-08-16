@@ -43,46 +43,49 @@ export default function Header({
 
       <div className="header-right">
         <div style={{ position: 'relative' }}>
-          <Search size={14} style={{ position: 'absolute', left: 10, top: 10, color: '#94a3b8' }} />
+          <Search size={14} style={{ position: 'absolute', left: 12, top: 10, color: '#64748b' }} />
           <input
             type="text"
             className="search-input"
-            style={{ paddingLeft: '2rem' }}
+            style={{ paddingLeft: '2.2rem', background: '#ffffff', color: '#0f172a', borderColor: 'rgba(255,255,255,0.4)', borderRadius: '8px' }}
             placeholder="Search Patient ID..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
+
         <div style={{ position: 'relative', cursor: 'pointer' }} onClick={onToggleNotifications} title="Notifications">
-          <Bell size={18} color="#64748b" />
+          <Bell size={18} color="#93c5fd" />
           <span style={{ position: 'absolute', top: -2, right: -2, width: 7, height: 7, background: '#ef4444', borderRadius: '50%' }}></span>
         </div>
-        <Wifi size={18} color="#0284c7" style={{ cursor: 'pointer' }} onClick={onOpenNetwork} title="Gateway Status" />
+
+        <Wifi size={18} color="#93c5fd" style={{ cursor: 'pointer' }} onClick={onOpenNetwork} title="Gateway Status" />
         
         {canUseVideo && (
-          <Video size={18} color="#64748b" style={{ cursor: 'pointer' }} onClick={onOpenVideo} title="Telehealth Video Call" />
+          <Video size={18} color="#93c5fd" style={{ cursor: 'pointer' }} onClick={onOpenVideo} title="Telehealth Video Call" />
         )}
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', borderLeft: '1px solid #e2e8f0', paddingLeft: '0.75rem' }} onClick={onOpenProfile}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', cursor: 'pointer', borderLeft: '1px solid rgba(255,255,255,0.25)', paddingLeft: '0.75rem' }} onClick={onOpenProfile}>
           <img
             src={currentUser?.avatar}
             alt={currentUser?.name}
             className="avatar"
             title={`${currentUser?.name} (${currentUser?.role})`}
+            style={{ border: '1px solid rgba(255,255,255,0.5)' }}
           />
           <div style={{ display: 'flex', flexDirection: 'column', lineHeight: '1.1' }}>
-            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#0f172a' }}>{currentUser?.name}</span>
-            <span style={{ fontSize: '0.68rem', color: '#0284c7', fontWeight: 600 }}>{currentUser?.role?.split(' ')[0]}</span>
+            <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#ffffff' }}>{currentUser?.name}</span>
+            <span style={{ fontSize: '0.68rem', color: '#93c5fd', fontWeight: 600 }}>{currentUser?.role?.split(' ')[0]}</span>
           </div>
         </div>
 
         <button
           className="btn-ctrl"
-          style={{ padding: '0.35rem 0.5rem', color: '#dc2626', borderColor: '#fca5a5', background: '#fef2f2' }}
+          style={{ padding: '0.35rem 0.6rem', color: '#dc2626', borderColor: '#fca5a5', background: '#ffffff', borderRadius: '6px' }}
           onClick={onLogout}
           title="Sign Out & Return to Login"
         >
-          <LogOut size={14} />
+          <LogOut size={15} />
         </button>
       </div>
     </header>
