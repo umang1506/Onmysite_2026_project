@@ -153,8 +153,7 @@ export default function App() {
     setCurrentUser(userAccount);
     setIsAuthenticated(true);
 
-    // Set initial default nav per role
-    if (userRole === 'admin') {
+    if (userAccount.id === 'admin') {
       setActiveNav('dashboard');
     } else {
       setActiveNav('triage-feed');
@@ -305,8 +304,8 @@ export default function App() {
             <StaffingView />
           ) : (
             <>
-              {activeNav === 'dashboard' && ['physician', 'admin'].includes(userRole) && (
-                <DashboardView onNavigate={(nav) => setActiveNav(nav)} />
+              {activeNav === 'dashboard' && (
+                <DashboardView currentUser={currentUser} onNavigate={(nav) => setActiveNav(nav)} />
               )}
 
               {activeNav === 'triage-feed' && ['physician', 'nurse', 'psychiatrist'].includes(userRole) && (
