@@ -188,9 +188,11 @@ export default function App() {
       bClass = 'badge-mhurgent';
     }
 
+    const cleanSessionId = sessionId.startsWith('#') ? sessionId : `#${sessionId}`;
+
     const newSessionObj = {
-      sessionId: `#${sessionId}`,
-      id: sessionId,
+      sessionId: cleanSessionId,
+      id: cleanSessionId.replace('#', ''),
       patientName: formData.patientName || 'New Patient',
       patientDetails: `ID: ${patientId} • 35M`,
       dob: '01/01/1990 (35M)',
@@ -250,7 +252,7 @@ export default function App() {
     setSessions((prev) => [newSessionObj, ...prev]);
     setPatientRecords((prev) => [newRecordObj, ...prev]);
 
-    setSelectedSessionId(`#${sessionId}`);
+    setSelectedSessionId(cleanSessionId);
     setActiveHeaderTab('ED Queue');
     setActiveNav('triage-feed');
   };

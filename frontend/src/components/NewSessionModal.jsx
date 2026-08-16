@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { X, Play, Mic, MicOff, Sparkles } from 'lucide-react';
 import { sendEvent, fetchTriage } from '../api/client';
 
@@ -11,10 +11,57 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
   const [source, setSource] = useState('audio');
   const [loading, setLoading] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
+  const recognitionRef = useRef(null);
 
   if (!isOpen) return null;
 
-  const handleSimulatedVoiceRecord = () => {
+  const handleVoiceRecord = () => {
+    // 1. Check for Browser SpeechRecognition API support
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+    if (SpeechRecognition) {
+      if (isRecording) {
+        if (recognitionRef.current) recognitionRef.current.stop();
+        setIsRecording(false);
+        return;
+      }
+
+      try {
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+
+        recognition.onstart = () => {
+          setIsRecording(true);
+          setSymptoms('Listening to voice audio intake...');
+        };
+
+        recognition.onresult = (event) => {
+          const transcript = Array.from(event.results)
+            .map((res) => res[0].transcript)
+            .join('');
+          setSymptoms(transcript);
+          setSource('audio');
+        };
+
+        recognition.onerror = () => {
+          setIsRecording(false);
+        };
+
+        recognition.onend = () => {
+          setIsRecording(false);
+        };
+
+        recognitionRef.current = recognition;
+        recognition.start();
+        return;
+      } catch (e) {
+        // Fallback to simulated audio if browser blocks speech recognition
+      }
+    }
+
+    // 2. Simulated Speech-to-Text Fallback
     setIsRecording(true);
     setSymptoms('Listening to voice audio intake...');
     setTimeout(() => {
@@ -154,11 +201,11 @@ export default function NewSessionModal({ isOpen, onClose, onSessionCreated }) {
               <button
                 type="button"
                 className="btn-ctrl"
-                onClick={handleSimulatedVoiceRecord}
-                style={{ background: isRecording ? '#fef2f2' : '#e0f2fe', color: isRecording ? '#dc2626' : '#0284c7', border: '1px solid #bae6fd', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem' }}
+                onClick={handleVoiceRecord}
+                style={{ background: isRecording ? '#fef2f2' : '#e0f2fe', color: isRecording ? '#dc2626' : '#0284c7', border: '1px solid #bae6fd', fontSize: '0.75rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.3rem', cursor: 'pointer' }}
               >
-                {isRecording ? <MicOff size={14} className="spin" /> : <Mic size={14} />}
-                {isRecording ? 'Listening...' : '🎙️ Record Voice Audio'}
+                {isRecording ? <MicOff size={14} /> : <Mic size={14} />}
+                {isRecording ? 'Stop Listening...' : 'Record Voice Audio'}
               </button>
             </div>
             <textarea
